@@ -14,9 +14,7 @@ import {
 import { supabase } from "../lib/supabaseclient";
 import { useRouter } from "expo-router";
 
-interface HomeScreenProps {}
-
-export default function HomeScreen({}: HomeScreenProps) {
+export default function HomeScreen() {
   const router = useRouter();
   const [name, setName] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -106,7 +104,7 @@ export default function HomeScreen({}: HomeScreenProps) {
           <Modal
             transparent={true}
             visible={isRepeatModalVisible}
-            animationType="slide"
+            animationType="fade"
             onRequestClose={() => setRepeatModalVisible(false)}
           >
             <View style={styles.modalOverlay}>
@@ -189,7 +187,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
-    justifyContent: "center", // Center content vertically
+    justifyContent: "center",
   },
   inputText: {
     fontSize: 16,
