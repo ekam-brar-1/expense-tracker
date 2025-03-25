@@ -9,32 +9,39 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  Modal,
 } from "react-native";
 import { supabase } from "../lib/supabaseclient";
 import { useRouter } from "expo-router";
 
-// Icons (you'll need to replace these with actual icon imports)
-const GroceryIcon = () => (
-  <View style={styles.iconContainer}>
-    <Image source={require("../assets/grocery-icon.png")} style={styles.icon} />
-  </View>
-);
-
 export default function HomeScreen() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("");
-  const [repeat, setRepeat] = useState("");
+  const [name, setName] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [date, setDate] = useState<string>("");
+  const [repeat, setRepeat] = useState<string>("");
+  const [isRepeatModalVisible, setRepeatModalVisible] =
+    useState<boolean>(false);
 
-  const handleAddExpense = () => {
-    // Implement add expense logic
+  const repeatOptions: string[] = [
+    "No",
+    "Daily",
+    "Weekly",
+    "Bi-Weekly",
+    "Monthly",
+  ];
+
+  const handleAddExpense = (): void => {
     console.log("Adding Expense:", { name, amount, date, repeat });
   };
 
-  const handleAddIncome = () => {
-    // Implement add income logic
+  const handleAddIncome = (): void => {
     console.log("Adding Income:", { name, amount, date, repeat });
+  };
+
+  const handleRepeatSelect = (option: string): void => {
+    setRepeat(option);
+    setRepeatModalVisible(false);
   };
 
   return (
@@ -192,7 +199,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 150,
-    height: 75,
+    height: 150,
   },
   welcomeText: {
     fontSize: 18,
@@ -216,6 +223,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
+    justifyContent: "center",
+  },
+  inputText: {
+    fontSize: 16,
+    color: "#333",
   },
   actionButtons: {
     flexDirection: "row",
@@ -241,82 +253,44 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-  recentSection: {
-    paddingHorizontal: 20,
-    marginTop: 20,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  recentTitle: {
-    fontSize: 16,
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  recentItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  modalOption: {
+    width: "100%",
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f1f1",
+    alignItems: "center",
+  },
+  modalOptionText: {
+    fontSize: 16,
+  },
+  modalCancelButton: {
+    marginTop: 15,
+    width: "100%",
+    padding: 15,
     alignItems: "center",
     backgroundColor: "#f1f1f1",
     borderRadius: 10,
-    padding: 15,
   },
-  recentItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconContainer: {
-    marginRight: 15,
-    backgroundColor: "#2ecc71",
-    borderRadius: 8,
-    padding: 10,
-  },
-  icon: {
-    width: 30,
-    height: 30,
-  },
-  recentItemTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  recentItemSubtitle: {
-    color: "#666",
-  },
-  recentItemDate: {
-    color: "#999",
-    fontSize: 12,
-  },
-  recentItemRight: {
-    alignItems: "flex-end",
-  },
-  expenseAmount: {
+  modalCancelButtonText: {
     color: "red",
     fontWeight: "bold",
-    marginBottom: 5,
-  },
-  removeButton: {
-    backgroundColor: "red",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  removeButtonText: {
-    color: "white",
-    fontSize: 12,
-  },
-  bottomNavigation: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderTopColor: "#f1f1f1",
-    paddingVertical: 10,
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navIcon: {
-    width: 25,
-    height: 25,
-  },
-  navText: {
-    fontSize: 12,
-    marginTop: 5,
   },
 });
