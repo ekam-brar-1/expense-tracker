@@ -1,6 +1,3 @@
-// app/(tabs)/index.tsx
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 "use client";
 import React, { useState } from "react";
 import {
@@ -41,139 +38,143 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to the Home Screen</Text>
-    </View>
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Logo and Welcome */}
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../assets/spendsavvy.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text style={styles.welcomeText}>Welcome, John</Text>
-        </View>
-
-        {/* Input Fields */}
-        <View style={styles.inputSection}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Name:</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter name"
-              placeholderTextColor="#888"
+    <>
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome to the Home Screen</Text>
+      </View>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {/* Logo and Welcome */}
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../assets/spendsavvy.png")}
+              style={styles.logo}
+              resizeMode="contain"
             />
+            <Text style={styles.welcomeText}>Welcome, John</Text>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Amount:</Text>
-            <TextInput
-              style={styles.input}
-              value={amount}
-              onChangeText={setAmount}
-              placeholder="Enter amount"
-              placeholderTextColor="#888"
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Date:</Text>
-            <TextInput
-              style={styles.input}
-              value={date}
-              onChangeText={setDate}
-              placeholder="Select date"
-              placeholderTextColor="#888"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Repeat:</Text>
-            <TextInput
-              style={styles.input}
-              value={repeat}
-              onChangeText={setRepeat}
-              placeholder="Select repeat"
-              placeholderTextColor="#888"
-            />
-          </View>
-
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.expenseButton}
-              onPress={handleAddExpense}
-            >
-              <Text style={styles.buttonText}>Add Expense</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.incomeButton}
-              onPress={handleAddIncome}
-            >
-              <Text style={styles.buttonText}>Add Income</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Recently Added Section */}
-        <View style={styles.recentSection}>
-          <Text style={styles.recentTitle}>Recently added Expense/Income:</Text>
-          <View style={styles.recentItem}>
-            <View style={styles.recentItemLeft}>
-              <GroceryIcon />
-              <View>
-                <Text style={styles.recentItemTitle}>Grocery</Text>
-                <Text style={styles.recentItemSubtitle}>Freshco</Text>
-                <Text style={styles.recentItemDate}>12-2-25</Text>
-              </View>
+          {/* Input Fields */}
+          <View style={styles.inputSection}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Name:</Text>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
+                placeholder="Enter name"
+                placeholderTextColor="#888"
+              />
             </View>
-            <View style={styles.recentItemRight}>
-              <Text style={styles.expenseAmount}>- $1000</Text>
-              <TouchableOpacity style={styles.removeButton}>
-                <Text style={styles.removeButtonText}>Remove</Text>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Amount:</Text>
+              <TextInput
+                style={styles.input}
+                value={amount}
+                onChangeText={setAmount}
+                placeholder="Enter amount"
+                placeholderTextColor="#888"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Date:</Text>
+              <TextInput
+                style={styles.input}
+                value={date}
+                onChangeText={setDate}
+                placeholder="Select date"
+                placeholderTextColor="#888"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Repeat:</Text>
+              <TextInput
+                style={styles.input}
+                value={repeat}
+                onChangeText={setRepeat}
+                placeholder="Select repeat"
+                placeholderTextColor="#888"
+              />
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={styles.expenseButton}
+                onPress={handleAddExpense}
+              >
+                <Text style={styles.buttonText}>Add Expense</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.incomeButton}
+                onPress={handleAddIncome}
+              >
+                <Text style={styles.buttonText}>Add Income</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
 
-        {/* Bottom Navigation */}
-        <View style={styles.bottomNavigation}>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/home-icon.png")}
-              style={styles.navIcon}
-            />
-            <Text style={styles.navText}>Home</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/graph-icon.png")}
-              style={styles.navIcon}
-            />
-            <Text style={styles.navText}>Reports</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/scan-icon.png")}
-              style={styles.navIcon}
-            />
-            <Text style={styles.navText}>Scan Receipt</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/account-icon.png")}
-              style={styles.navIcon}
-            />
-            <Text style={styles.navText}>Profile</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          {/* Recently Added Section */}
+          <View style={styles.recentSection}>
+            <Text style={styles.recentTitle}>
+              Recently added Expense/Income:
+            </Text>
+            <View style={styles.recentItem}>
+              <View style={styles.recentItemLeft}>
+                <GroceryIcon />
+                <View>
+                  <Text style={styles.recentItemTitle}>Grocery</Text>
+                  <Text style={styles.recentItemSubtitle}>Freshco</Text>
+                  <Text style={styles.recentItemDate}>12-2-25</Text>
+                </View>
+              </View>
+              <View style={styles.recentItemRight}>
+                <Text style={styles.expenseAmount}>- $1000</Text>
+                <TouchableOpacity style={styles.removeButton}>
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          {/* Bottom Navigation */}
+          <View style={styles.bottomNavigation}>
+            <TouchableOpacity style={styles.navItem}>
+              <Image
+                source={require("../assets/home-icon.png")}
+                style={styles.navIcon}
+              />
+              <Text style={styles.navText}>Home</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.navItem}>
+              <Image
+                source={require("../assets/graph-icon.png")}
+                style={styles.navIcon}
+              />
+              <Text style={styles.navText}>Reports</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.navItem}>
+              <Image
+                source={require("../assets/scan-icon.png")}
+                style={styles.navIcon}
+              />
+              <Text style={styles.navText}>Scan Receipt</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.navItem}>
+              <Image
+                source={require("../assets/account-icon.png")}
+                style={styles.navIcon}
+              />
+              <Text style={styles.navText}>Profile</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 }
 

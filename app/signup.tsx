@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Alert,
 } from "react-native";
 import { supabase } from "../lib/supabaseclient";
 import { useRouter } from "expo-router";
@@ -27,31 +28,6 @@ export default function SignupScreen() {
       router.replace("/(tabs)");
     } catch (error: any) {
       Alert.alert("Signup Error", error.message);
-      // Step 1: Sign up the user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      if (authError) {
-        throw authError;
-      }
-      // Step 2: If auth signup is successful, insert user details into user_details table
-      if (authData.user) {
-        const { error: insertError } = await supabase
-          .from("user_details")
-          .insert({
-            UUID: authData.user.id,
-            first_name: firstname,
-            last_name: lastname,
-            email: email,
-          });
-        if (insertError) {
-          throw insertError;
-        }
-        router.replace("/"); // Navigate to home after successful signup
-      }
-    } catch (error) {
-      console.error("Error signing up:", error);
     }
   };
 
