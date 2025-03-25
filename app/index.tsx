@@ -9,48 +9,55 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  Modal,
 } from "react-native";
 import { supabase } from "../lib/supabaseclient";
 import { useRouter } from "expo-router";
 
-// Icons (you'll need to replace these with actual icon imports)
-const GroceryIcon = () => (
-  <View style={styles.iconContainer}>
-    <Image source={require("../assets/grocery-icon.png")} style={styles.icon} />
-  </View>
-);
+interface HomeScreenProps {}
 
-export default function HomeScreen() {
+export default function HomeScreen({}: HomeScreenProps) {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("");
-  const [repeat, setRepeat] = useState("");
+  const [name, setName] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [date, setDate] = useState<string>("");
+  const [repeat, setRepeat] = useState<string>("");
+  const [isRepeatModalVisible, setRepeatModalVisible] =
+    useState<boolean>(false);
 
-  const handleAddExpense = () => {
-    // Implement add expense logic
+  const repeatOptions: string[] = [
+    "No",
+    "Daily",
+    "Weekly",
+    "Bi-Weekly",
+    "Monthly",
+  ];
+
+  const handleAddExpense = (): void => {
     console.log("Adding Expense:", { name, amount, date, repeat });
   };
 
-  const handleAddIncome = () => {
-    // Implement add income logic
+  const handleAddIncome = (): void => {
     console.log("Adding Income:", { name, amount, date, repeat });
+  };
+
+  const handleRepeatSelect = (option: string): void => {
+    setRepeat(option);
+    setRepeatModalVisible(false);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Logo and Welcome */}
         <View style={styles.logoContainer}>
           <Image
             source={require("../assets/spendsavvy.png")}
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.welcomeText}>Welcome, John</Text>
+          <Text style={styles.welcomeText}>Welcome, NAME</Text>
         </View>
 
-        {/* Input Fields */}
         <View style={styles.inputSection}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Name:</Text>
@@ -88,16 +95,42 @@ export default function HomeScreen() {
 
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Repeat:</Text>
-            <TextInput
+            <TouchableOpacity
               style={styles.input}
-              value={repeat}
-              onChangeText={setRepeat}
-              placeholder="Select repeat"
-              placeholderTextColor="#888"
-            />
+              onPress={() => setRepeatModalVisible(true)}
+            >
+              <Text style={styles.inputText}>{repeat || "Select"}</Text>
+            </TouchableOpacity>
           </View>
 
-          {/* Action Buttons */}
+          <Modal
+            transparent={true}
+            visible={isRepeatModalVisible}
+            animationType="slide"
+            onRequestClose={() => setRepeatModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Select Repeat Option</Text>
+                {repeatOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={styles.modalOption}
+                    onPress={() => handleRepeatSelect(option)}
+                  >
+                    <Text style={styles.modalOptionText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => setRepeatModalVisible(false)}
+                >
+                  <Text style={styles.modalCancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
           <View style={styles.actionButtons}>
             <TouchableOpacity
               style={styles.expenseButton}
@@ -112,59 +145,6 @@ export default function HomeScreen() {
               <Text style={styles.buttonText}>Add Income</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Recently Added Section */}
-        <View style={styles.recentSection}>
-          <Text style={styles.recentTitle}>Recently added Expense/Income:</Text>
-          <View style={styles.recentItem}>
-            <View style={styles.recentItemLeft}>
-              <GroceryIcon />
-              <View>
-                <Text style={styles.recentItemTitle}>Grocery</Text>
-                <Text style={styles.recentItemSubtitle}>Freshco</Text>
-                <Text style={styles.recentItemDate}>12-2-25</Text>
-              </View>
-            </View>
-            <View style={styles.recentItemRight}>
-              <Text style={styles.expenseAmount}>- $1000</Text>
-              <TouchableOpacity style={styles.removeButton}>
-                <Text style={styles.removeButtonText}>Remove</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Bottom Navigation */}
-        <View style={styles.bottomNavigation}>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/home-icon.png")}
-              style={styles.navIcon}
-            />
-            <Text style={styles.navText}>Home</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/graph-icon.png")}
-              style={styles.navIcon}
-            />
-            <Text style={styles.navText}>Reports</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/scan-icon.png")}
-              style={styles.navIcon}
-            />
-            <Text style={styles.navText}>Scan Receipt</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/account-icon.png")}
-              style={styles.navIcon}
-            />
-            <Text style={styles.navText}>Profile</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -185,7 +165,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 150,
-    height: 75,
+    height: 150,
   },
   welcomeText: {
     fontSize: 18,
@@ -209,6 +189,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
+    justifyContent: "center", // Center content vertically
+  },
+  inputText: {
+    fontSize: 16,
+    color: "#333",
   },
   actionButtons: {
     flexDirection: "row",
@@ -234,82 +219,44 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-  recentSection: {
-    paddingHorizontal: 20,
-    marginTop: 20,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  recentTitle: {
-    fontSize: 16,
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  recentItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  modalOption: {
+    width: "100%",
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f1f1",
+    alignItems: "center",
+  },
+  modalOptionText: {
+    fontSize: 16,
+  },
+  modalCancelButton: {
+    marginTop: 15,
+    width: "100%",
+    padding: 15,
     alignItems: "center",
     backgroundColor: "#f1f1f1",
     borderRadius: 10,
-    padding: 15,
   },
-  recentItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconContainer: {
-    marginRight: 15,
-    backgroundColor: "#2ecc71",
-    borderRadius: 8,
-    padding: 10,
-  },
-  icon: {
-    width: 30,
-    height: 30,
-  },
-  recentItemTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  recentItemSubtitle: {
-    color: "#666",
-  },
-  recentItemDate: {
-    color: "#999",
-    fontSize: 12,
-  },
-  recentItemRight: {
-    alignItems: "flex-end",
-  },
-  expenseAmount: {
+  modalCancelButtonText: {
     color: "red",
     fontWeight: "bold",
-    marginBottom: 5,
-  },
-  removeButton: {
-    backgroundColor: "red",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  removeButtonText: {
-    color: "white",
-    fontSize: 12,
-  },
-  bottomNavigation: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderTopColor: "#f1f1f1",
-    paddingVertical: 10,
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navIcon: {
-    width: 25,
-    height: 25,
-  },
-  navText: {
-    fontSize: 12,
-    marginTop: 5,
   },
 });
