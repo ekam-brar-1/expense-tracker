@@ -2,24 +2,24 @@
 "use client";
 
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { supabase } from "../lib/supabaseclient";
 import { useRouter } from "expo-router";
+import { useAuth } from "./auth-context";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      console.error("Error logging in:", error.message);
-    } else {
-      router.replace("/"); // Navigate to home after successful login
+    try {
+      await login(email, password);
+      // Navigate to the protected tabs layout after login
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      Alert.alert("Login Error", error.message);
     }
   };
 

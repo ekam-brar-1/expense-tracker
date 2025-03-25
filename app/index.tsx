@@ -1,23 +1,11 @@
-// app/index.tsx
-"use client";
-
+// app/(tabs)/index.tsx
 import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import { supabase } from "../lib/supabaseclient";
-import { useRouter } from "expo-router";
+import { View, Text, StyleSheet } from "react-native";
 
 export default function HomeScreen() {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.replace("/login");
-  };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home Screen</Text>
-      <Button title="Logout" onPress={handleLogout} />
+      <Text style={styles.title}>Welcome to the Home Screen</Text>
     </View>
   );
 }

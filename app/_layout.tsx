@@ -1,43 +1,36 @@
+// app/_layout.tsx
 "use client";
 
 import { Slot, useRouter, usePathname } from "expo-router";
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseclient";
 import { ActivityIndicator, View } from "react-native";
+import { supabase } from "../lib/supabaseclient";
+import { AuthProvider, useAuth } from "./auth-context";
 
-export default function RootLayout() {
+function RootContent() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
 
-  // Check the Supabase session
+  // We assume that the initial supabase session check is handled within our AuthProvider.
   useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
-    };
-    checkSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+    setLoading(false);
   }, []);
 
-  // Perform navigation in an effect after mount to avoid navigating during render
+  // Define public routes (e.g., login & signup)
+  const publicRoutes = ["/login", "/signup"];
+
+  // If user is not authenticated and is not on a public route, redirect to login.
   useEffect(() => {
-    // List of routes that don't require authentication
-    const publicRoutes = ["/login", "/signup"];
-    if (!loading && !user && !publicRoutes.includes(pathname)) {
-      router.replace("/login");
+    if (!loading) {
+      if (!user && !publicRoutes.includes(pathname)) {
+        router.replace("/login");
+      }
+      // Optionally, redirect an authenticated user away from public routes.
+      else if (user && publicRoutes.includes(pathname)) {
+        router.replace("/(tabs)"); // assuming your tabs layout is inside the (tabs) folder
+      }
     }
   }, [loading, user, pathname, router]);
 
@@ -50,4 +43,12 @@ export default function RootLayout() {
   }
 
   return <Slot />;
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootContent />
+    </AuthProvider>
+  );
 }
