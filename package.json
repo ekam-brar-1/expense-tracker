@@ -17,7 +17,8 @@
     "react-native": "0.76.7",
     "react-native-safe-area-context": "^5.3.0",
     "react-native-screens": "^4.9.2",
-    "react-native-web": "~0.19.13"
+    "react-native-web": "~0.19.13",
+    "expo-camera": "~16.0.18"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
