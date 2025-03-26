@@ -36,7 +36,7 @@ export default function AppTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="reports"
+        name="reportScreen"
         options={{
           title: "Reports",
           tabBarIcon: ({ focused, color }) => (
