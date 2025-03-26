@@ -21,11 +21,40 @@ export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { signup } = useAuth();
+
   const handleSignup = async () => {
+    // Basic validation
+    if (!firstname || !lastname || !email || !password) {
+      Alert.alert("Signup Error", "Please fill in all fields");
+      return;
+    }
+
     try {
-      await signup(firstname, lastname, email, password);
-      // Navigate to the protected tabs layout after signup
-      router.replace("/(tabs)");
+      // Signup with authentication
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      // If signup is successful and we have a user
+      if (data.user) {
+        // Insert additional user details into user_details table
+        const { error: insertError } = await supabase
+          .from("user_details")
+          .insert({
+            user_id: data.user.id,
+            first_name: firstname,
+            last_name: lastname,
+            email: email,
+          });
+
+        if (insertError) throw insertError;
+
+        // Navigate to the protected tabs layout after signup
+        router.replace("/(tabs)");
+      }
     } catch (error: any) {
       Alert.alert("Signup Error", error.message);
     }
