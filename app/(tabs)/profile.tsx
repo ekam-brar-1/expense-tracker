@@ -5,6 +5,7 @@ import { useAuth } from "../auth-context";
 
 
 export default function ProfileScreen() {
+    const { user} = useAuth();
     const [isDarkMode, setIsDarkMode] = useState(false);
     const { logout } = useAuth();
 
@@ -31,8 +32,8 @@ export default function ProfileScreen() {
                     source={require("../../assets/account-icon.png")}
                 />
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>User Name</Text>
-                    <Text style={styles.userEmail}>email@placeholder.com</Text>
+                    <Text style={styles.userName}>{user?.first_name || "N/A"}</Text>
+                    <Text style={styles.userEmail}>{user?.email}</Text>
                     
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                         <Text style={styles.logoutButtonText}>LOGOUT</Text>
