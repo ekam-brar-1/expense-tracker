@@ -6,6 +6,7 @@ export default function AppTabsLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: "#333", // Dark color for active tab
         tabBarInactiveTintColor: "#888", // Grey for inactive tab
         tabBarStyle: {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import { useAuth } from "../auth-context";
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const [firstName, setFirstName] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [date, setDate] = useState<Date>(new Date());
@@ -27,6 +28,31 @@ export default function HomeScreen() {
   const [repeat, setRepeat] = useState<string>("");
   const [isRepeatModalVisible, setRepeatModalVisible] =
     useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchUserFirstName = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("user_details")
+          .select("first_name")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setFirstName(data.first_name || "User");
+        }
+      } catch (error) {
+        console.error("Error fetching user first name:", error);
+        setFirstName("User");
+      }
+    };
+
+    fetchUserFirstName();
+  }, [user]);
 
   const repeatOptions: string[] = [
     "No",
@@ -142,9 +168,7 @@ export default function HomeScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.welcomeText}>
-            Welcome, {user?.user_metadata?.firstName || "User"}
-          </Text>
+          <Text style={styles.welcomeText}>Welcome, {firstName}</Text>
         </View>
 
         <View style={styles.inputSection}>
