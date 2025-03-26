@@ -32,7 +32,7 @@ export default function ProfileScreen() {
                     source={require("../../assets/account-icon.png")}
                 />
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{user?.first_name || "N/A"}</Text>
+                    <Text style={styles.userName}>{user?.first_name || "Placeholder"}</Text>
                     <Text style={styles.userEmail}>{user?.email}</Text>
                     
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -43,11 +43,15 @@ export default function ProfileScreen() {
 
             {/* Settings Section  */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Settings</Text>
+                
+                <View style={styles.sectionHeading}>
+                  <Image style={styles.iconImage} source={require("../../assets/account-icon.png")}/>
+                  <Text style={styles.sectionTitle}>Settings</Text>
+                </View>
                 
                 <View style={styles.settingItem}>
-                    <Text style={styles.settingLabel}>Language</Text>
-                    <Text style={styles.dropdown}>English</Text>
+                  <Text style={styles.settingLabel}>Language</Text>
+                  <Text style={styles.dropdown}>English</Text>
                 </View>
                 <View style={styles.settingItem}>
                     <Text style={styles.settingLabel}>Dark Mode</Text>
@@ -60,7 +64,11 @@ export default function ProfileScreen() {
 
             {/* Account Section  */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Account</Text>
+                  <View style={styles.sectionHeading}>
+                      <Image style={styles.iconImage} source={require("../../assets/account-icon.png")}/>
+                      <Text style={styles.sectionTitle}>Account</Text>
+                  </View>
+
                 <View style={styles.settingItem}>
                     <Text style={styles.settingLabel}>Delete Account</Text>
                     <TouchableOpacity style={styles.logoutButton} onPress={handleDeleteAccount}>
@@ -97,6 +105,11 @@ const styles = StyleSheet.create({
       height: 80,
       borderRadius: 30,
       marginRight: 12,
+    },
+    iconImage: {
+      width: 30,
+      height: 30,
+      marginRight: 2,
     },
     userInfo: {
       flex: 1,
@@ -135,13 +148,20 @@ const styles = StyleSheet.create({
     sectionTitle: {
       fontSize: 16,
       fontWeight: '600',
-      marginBottom: 12,
+    },
+    sectionHeading: {
+      flexDirection: 'row',
+      marginBottom: 10,
+      alignItems: 'center',
     },
     settingItem: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 12,
+      backgroundColor:'#F1F1F1',
+      borderRadius: 5,
+      padding: 5
     },
     settingLabel: {
       fontSize: 14,
