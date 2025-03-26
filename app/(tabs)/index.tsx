@@ -10,15 +10,20 @@ import {
   SafeAreaView,
   ScrollView,
   Modal,
+  Alert,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { supabase } from "../../lib/supabaseclient";
 import { useRouter } from "expo-router";
+import { useAuth } from "../auth-context";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [name, setName] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
-  const [date, setDate] = useState<string>("");
+  const [date, setDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [repeat, setRepeat] = useState<string>("");
   const [isRepeatModalVisible, setRepeatModalVisible] =
     useState<boolean>(false);
@@ -31,12 +36,96 @@ export default function HomeScreen() {
     "Monthly",
   ];
 
-  const handleAddExpense = (): void => {
-    console.log("Adding Expense:", { name, amount, date, repeat });
+  const repeatValueMap: { [key: string]: number } = {
+    No: 0,
+    Daily: 1,
+    Weekly: 2,
+    "Bi-Weekly": 3,
+    Monthly: 4,
   };
 
-  const handleAddIncome = (): void => {
-    console.log("Adding Income:", { name, amount, date, repeat });
+  const formatDate = (selectedDate: Date): string => {
+    return selectedDate.toISOString().split("T")[0];
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(false);
+    setDate(currentDate);
+  };
+
+  const handleAddExpense = async (): Promise<void> => {
+    // Validate inputs
+    if (!name || !amount || !date) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    // Validate user is logged in
+    if (!user) {
+      Alert.alert("Error", "You must be logged in to add expenses");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("expenses").insert({
+        user_id: user.id,
+        name: name,
+        amount: parseFloat(amount),
+        start_date: formatDate(date),
+        repeat: repeatValueMap[repeat] || 0,
+      });
+
+      if (error) throw error;
+
+      // Clear inputs after successful submission
+      setName("");
+      setAmount("");
+      setDate(new Date());
+      setRepeat("");
+
+      Alert.alert("Success", "Expense added successfully");
+    } catch (error) {
+      console.error("Error adding expense:", error);
+      Alert.alert("Error", "Failed to add expense");
+    }
+  };
+
+  const handleAddIncome = async (): Promise<void> => {
+    // Validate inputs
+    if (!name || !amount || !date) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    // Validate user is logged in
+    if (!user) {
+      Alert.alert("Error", "You must be logged in to add income");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("income").insert({
+        user_id: user.id,
+        name: name,
+        amount: parseFloat(amount),
+        start_date: formatDate(date),
+        repeat: repeatValueMap[repeat] || 0,
+      });
+
+      if (error) throw error;
+
+      // Clear inputs after successful submission
+      setName("");
+      setAmount("");
+      setDate(new Date());
+      setRepeat("");
+
+      Alert.alert("Success", "Income added successfully");
+    } catch (error) {
+      console.error("Error adding income:", error);
+      Alert.alert("Error", "Failed to add income");
+    }
   };
 
   const handleRepeatSelect = (option: string): void => {
@@ -53,7 +142,9 @@ export default function HomeScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.welcomeText}>Welcome, NAME</Text>
+          <Text style={styles.welcomeText}>
+            Welcome, {user?.user_metadata?.firstName || "User"}
+          </Text>
         </View>
 
         <View style={styles.inputSection}>
@@ -82,13 +173,23 @@ export default function HomeScreen() {
 
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Date:</Text>
-            <TextInput
+            <TouchableOpacity
               style={styles.input}
-              value={date}
-              onChangeText={setDate}
-              placeholder="Select date"
-              placeholderTextColor="#888"
-            />
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={styles.inputText}>{formatDate(date)}</Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode="date"
+                is24Hour={true}
+                display="default"
+                onChange={handleDateChange}
+              />
+            )}
           </View>
 
           <View style={styles.inputContainer}>

@@ -1,6 +1,4 @@
-// auth-context.tsx
 "use client";
-
 import React, {
   createContext,
   useState,
@@ -102,3 +100,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+
+// Add default export to resolve Expo Router warning
+export default function AuthContextWrapper({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return <AuthProvider>{children}</AuthProvider>;
+}
