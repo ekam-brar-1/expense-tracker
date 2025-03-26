@@ -4,7 +4,6 @@
 import { Slot, useRouter, usePathname } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { supabase } from "../lib/supabaseclient";
 import { AuthProvider, useAuth } from "./auth-context";
 
 function RootContent() {
