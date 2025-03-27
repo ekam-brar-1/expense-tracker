@@ -1,8 +1,11 @@
 import { View, Text, TouchableOpacity, Button, StyleSheet} from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
+  const [flash, setFlash] = useState(false);
 
   const renderCamera = () => {
     return (
@@ -10,11 +13,32 @@ export default function ScanScreen() {
           style={styles.camera}
           mode="picture"
           facing="back"
+          enableTorch={flash}
           responsiveOrientationWhenOrientationLocked
         >
+          {/* Camera Shutter Button */}
+          <View style={styles.shutterContainer}>
+            <TouchableOpacity style={styles.shutterBtn}>
+              <View style={styles.shutterBtnInner} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Flash Button */}
+          <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
+            <Ionicons
+              name={flash ? "flash" : "flash-off"}
+              size={28}
+              color="white"
+            />
+          </TouchableOpacity>
         </CameraView>
       );
   };
+
+  const toggleFlash = () => {
+    setFlash((prev) => !prev);
+  };
+
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -52,9 +76,6 @@ const styles = StyleSheet.create({
       left: 0,
       width: "100%",
       alignItems: "center",
-      flexDirection: "row",
-      justifyContent: "space-between",
-      paddingHorizontal: 30,
     },
     shutterBtn: {
       backgroundColor: "transparent",
@@ -67,8 +88,17 @@ const styles = StyleSheet.create({
       justifyContent: "center",
     },
     shutterBtnInner: {
+      backgroundColor: "white",
       width: 70,
       height: 70,
       borderRadius: 50,
+    },
+    flashButton: {
+      position: "absolute",
+      top: 40,
+      right: 20,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      padding: 10,
+      borderRadius: 25,
     },
   });
