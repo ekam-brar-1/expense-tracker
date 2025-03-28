@@ -10,16 +10,9 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAuth } from "../auth-context";
+import NetPieChart from "../components/pie";
 import { fetchTransactions, Transaction } from "../../lib/fetchTransactions";
 
-/**
- * This screen fetches expenses & income, calculates totals,
- * enumerates repeated occurrences, and applies a Figma-like styling:
- * - A top row with date pickers
- * - A donut chart placeholder
- * - A tab toggle for Expense/Income
- * - A list of transactions (with repeated dates if applicable)
- */
 const ReportsScreen: React.FC = () => {
   const { user } = useAuth();
 
@@ -236,12 +229,8 @@ const ReportsScreen: React.FC = () => {
           />
         )}
       </View>
-
-      {/* --- DONUT CHART PLACEHOLDER --- */}
-      <View style={styles.chartContainer}>
-        <View style={styles.chartPlaceholder}>
-          <Text style={styles.chartValue}>Net ${netValue}</Text>
-        </View>
+      <View>
+        <NetPieChart totalExpenses={totalExpenses} totalIncome={totalIncome} />
       </View>
 
       {/* --- TAB TOGGLE (Expense/Income) --- */}
