@@ -174,21 +174,19 @@ const ReportsScreen: React.FC = () => {
             Start Date: 
           </Text>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={styles.dateText}>
-             {formatDate(reportStartDate)}
-          </Text>
-          <Ionicons name="calendar" size={20} color="#333" />
-            </View>
+            <Text style={styles.dateText}>
+              {formatDate(reportStartDate)}
+            </Text>
+            <Ionicons name="calendar" size={20} color="#333" />
+          </View>
           {showStartDatePicker && (
-        <DateTimePicker
-          value={reportStartDate}
-          mode="date"
-          display="default"
-          onChange={handleStartDateChange}
-        />
-
-      )}
-    
+            <DateTimePicker
+              value={reportStartDate}
+              mode="date"
+              display="default"
+              onChange={handleStartDateChange}
+            />
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -199,22 +197,21 @@ const ReportsScreen: React.FC = () => {
             End Date: 
           </Text>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={styles.dateText}>
-             {formatDate(reportEndDate)}
-          </Text>
-          <Ionicons name="calendar" size={20} color="#333" />
-           </View>
+            <Text style={styles.dateText}>
+              {formatDate(reportEndDate)}
+            </Text>
+            <Ionicons name="calendar" size={20} color="#333" />
+          </View>
           {showEndDatePicker && (
-        <DateTimePicker
-          value={reportEndDate}
-          mode="date"
-          display="default"
-          onChange={handleEndDateChange}
-        />
-      )}
-     
+            <DateTimePicker
+            value={reportEndDate}
+            mode="date"
+            display="default"
+            onChange={handleEndDateChange}
+          />
+        )}
         </TouchableOpacity>
-</View>
+      </View>
 
       {/* PIE CHART */}
       <View style={styles.chartContainer}>
