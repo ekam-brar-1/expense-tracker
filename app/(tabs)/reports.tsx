@@ -8,12 +8,22 @@ import {
   ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAuth } from "../auth-context";
 import { fetchTransactions, Transaction } from "../../lib/fetchTransactions";
 
+/**
+ * This screen fetches expenses & income, calculates totals,
+ * enumerates repeated occurrences, and applies a Figma-like styling:
+ * - A top row with date pickers
+ * - A donut chart placeholder
+ * - A tab toggle for Expense/Income
+ * - A list of transactions (with repeated dates if applicable)
+ */
 const ReportsScreen: React.FC = () => {
   const { user } = useAuth();
-  // Use a date range that covers your test records.
+
+  // Date range
   const [reportStartDate, setReportStartDate] = useState<Date>(
     new Date(2024, 0, 1)
   );
@@ -21,17 +31,24 @@ const ReportsScreen: React.FC = () => {
     new Date(2025, 11, 31)
   );
 
+  // Totals
   const [totalExpenses, setTotalExpenses] = useState<number>(0);
   const [totalIncome, setTotalIncome] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
 
-  // State hooks for the raw fetched data.
+  // Fetched data
   const [expenseData, setExpenseData] = useState<Transaction[]>([]);
   const [incomeData, setIncomeData] = useState<Transaction[]>([]);
 
+  // Loading state
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Date pickers
   const [showStartDatePicker, setShowStartDatePicker] =
     useState<boolean>(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false);
+
+  // Toggle between showing Expense or Income
+  const [activeTab, setActiveTab] = useState<"expense" | "income">("expense");
 
   useEffect(() => {
     if (user) {
@@ -52,12 +69,14 @@ const ReportsScreen: React.FC = () => {
       setExpenseData(expenseData);
       setIncomeData(incomeData);
 
-      const totalExpensesCalc = expenseData.reduce((sum, exp: Transaction) => {
+      // Calculate totals
+      const totalExpensesCalc = expenseData.reduce((sum, exp) => {
         return (
           sum + computeTransactionTotal(exp, reportStartDate, reportEndDate)
         );
       }, 0);
-      const totalIncomeCalc = incomeData.reduce((sum, inc: Transaction) => {
+
+      const totalIncomeCalc = incomeData.reduce((sum, inc) => {
         return (
           sum + computeTransactionTotal(inc, reportStartDate, reportEndDate)
         );
@@ -73,8 +92,8 @@ const ReportsScreen: React.FC = () => {
   };
 
   /**
-   * Computes the total amount contributed by a transaction within the given range.
-   * (This is similar to your existing logic.)
+   * Computes the total amount contributed by a transaction within the given date range.
+   * This logic includes handling repeated transactions.
    */
   const computeTransactionTotal = (
     transaction: Transaction,
@@ -88,17 +107,20 @@ const ReportsScreen: React.FC = () => {
       ? new Date(transaction.end_date)
       : null;
 
+    // If the transaction ends before the range or starts after the range, no contribution
     if (endDate && endDate < rangeStart) return 0;
     if (startDate > rangeEnd) return 0;
 
+    // One-time
     if (repeat === 0) {
       return startDate >= rangeStart && startDate <= rangeEnd ? amount : 0;
     }
 
+    // Repeating
     const effectiveEnd = endDate && endDate < rangeEnd ? endDate : rangeEnd;
-    const msPeriod = repeat * 24 * 60 * 60 * 1000;
     if (startDate > effectiveEnd) return 0;
 
+    const msPeriod = repeat * 24 * 60 * 60 * 1000;
     let diffToRangeStart = rangeStart.getTime() - startDate.getTime();
     let n = diffToRangeStart > 0 ? Math.ceil(diffToRangeStart / msPeriod) : 0;
     const firstOccurrenceMs = startDate.getTime() + n * msPeriod;
@@ -111,8 +133,7 @@ const ReportsScreen: React.FC = () => {
   };
 
   /**
-   * Returns an array of occurrence dates (as Date objects) for a transaction within the given range.
-   * For one-time transactions (repeat=0), returns the start_date if it falls in range.
+   * Returns all occurrence dates (as Date objects) for a transaction within the date range.
    */
   const getOccurrences = (
     transaction: Transaction,
@@ -126,6 +147,7 @@ const ReportsScreen: React.FC = () => {
       ? new Date(transaction.end_date)
       : null;
 
+    // One-time
     if (repeat === 0) {
       if (startDate >= rangeStart && startDate <= rangeEnd) {
         occurrences.push(startDate);
@@ -133,6 +155,7 @@ const ReportsScreen: React.FC = () => {
       return occurrences;
     }
 
+    // Repeating
     const effectiveEnd = endDate && endDate < rangeEnd ? endDate : rangeEnd;
     if (startDate > effectiveEnd) return occurrences;
 
@@ -154,209 +177,328 @@ const ReportsScreen: React.FC = () => {
     return occurrences;
   };
 
-  const formatDate = (date: Date): string => date.toISOString().split("T")[0];
+  const formatDate = (date: Date): string => {
+    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+  };
 
-  const handleStartDateChange = (event: any, selectedDate?: Date) => {
+  const handleStartDateChange = (_event: any, selectedDate?: Date) => {
     setShowStartDatePicker(false);
     if (selectedDate) setReportStartDate(selectedDate);
   };
 
-  const handleEndDateChange = (event: any, selectedDate?: Date) => {
+  const handleEndDateChange = (_event: any, selectedDate?: Date) => {
     setShowEndDatePicker(false);
     if (selectedDate) setReportEndDate(selectedDate);
   };
 
+  // Active data array (expense or income) based on the toggle
+  const currentData = activeTab === "expense" ? expenseData : incomeData;
+
+  // We’ll show a "net" or "total" in the chart placeholder.
+  // Feel free to adjust to your preference.
+  const netValue = totalIncome - totalExpenses;
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Reports</Text>
-      <View style={styles.dateContainer}>
+    <View style={styles.container}>
+      {/* --- DATE ROW --- */}
+      <View style={styles.dateRow}>
         <TouchableOpacity
-          style={styles.dateInput}
+          style={styles.dateButton}
           onPress={() => setShowStartDatePicker(true)}
         >
-          <Text style={styles.dateText}>
-            Start Date: {formatDate(reportStartDate)}
-          </Text>
+          <Text style={styles.dateText}>{formatDate(reportStartDate)}</Text>
+          <Ionicons name="calendar" size={20} color="#333" />
         </TouchableOpacity>
+
         {showStartDatePicker && (
           <DateTimePicker
             value={reportStartDate}
             mode="date"
-            is24Hour={true}
             display="default"
             onChange={handleStartDateChange}
           />
         )}
+
         <TouchableOpacity
-          style={styles.dateInput}
+          style={styles.dateButton}
           onPress={() => setShowEndDatePicker(true)}
         >
-          <Text style={styles.dateText}>
-            End Date: {formatDate(reportEndDate)}
-          </Text>
+          <Text style={styles.dateText}>{formatDate(reportEndDate)}</Text>
+          <Ionicons name="calendar" size={20} color="#333" />
         </TouchableOpacity>
+
         {showEndDatePicker && (
           <DateTimePicker
             value={reportEndDate}
             mode="date"
-            is24Hour={true}
             display="default"
             onChange={handleEndDateChange}
           />
         )}
       </View>
+
+      {/* --- DONUT CHART PLACEHOLDER --- */}
+      <View style={styles.chartContainer}>
+        <View style={styles.chartPlaceholder}>
+          <Text style={styles.chartValue}>Net ${netValue}</Text>
+        </View>
+      </View>
+
+      {/* --- TAB TOGGLE (Expense/Income) --- */}
+      <View style={styles.tabRow}>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === "expense" && styles.tabButtonActiveExpense,
+          ]}
+          onPress={() => setActiveTab("expense")}
+        >
+          <Text
+            style={[
+              styles.tabButtonText,
+              activeTab === "expense" && styles.tabButtonTextActive,
+            ]}
+          >
+            Expense
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === "income" && styles.tabButtonActiveIncome,
+          ]}
+          onPress={() => setActiveTab("income")}
+        >
+          <Text
+            style={[
+              styles.tabButtonText,
+              activeTab === "income" && styles.tabButtonTextActive,
+            ]}
+          >
+            Income
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* --- LOADING OR CONTENT --- */}
       {loading ? (
-        <ActivityIndicator size="large" color="#333" />
+        <ActivityIndicator
+          size="large"
+          color="#333"
+          style={{ marginTop: 20 }}
+        />
       ) : (
-        <>
+        <ScrollView style={styles.listContainer}>
+          {/* Totals summary */}
           <View style={styles.totalsContainer}>
             <Text style={styles.totalText}>
               Total Expenses: {totalExpenses}
             </Text>
             <Text style={styles.totalText}>Total Income: {totalIncome}</Text>
-            <Text style={styles.totalText}>
-              Net: {totalIncome - totalExpenses}
+            <Text style={styles.totalText}>Net: {netValue}</Text>
+          </View>
+
+          {/* Render items for the active tab */}
+          {currentData.length === 0 ? (
+            <Text style={styles.emptyText}>
+              No {activeTab === "expense" ? "expenses" : "income"} found.
             </Text>
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionHeader}>Expenses</Text>
-            {expenseData.length === 0 ? (
-              <Text style={styles.emptyText}>No expenses found.</Text>
-            ) : (
-              expenseData.map((exp, index) => {
-                const occurrences = getOccurrences(
-                  exp,
-                  reportStartDate,
-                  reportEndDate
-                );
-                return (
-                  <View key={index} style={styles.item}>
-                    <Text style={styles.itemText}>
-                      {exp.name}: ${exp.amount}
+          ) : (
+            currentData.map((item, index) => {
+              const occurrences = getOccurrences(
+                item,
+                reportStartDate,
+                reportEndDate
+              );
+              return (
+                <View key={index} style={styles.itemContainer}>
+                  <View style={styles.itemDetails}>
+                    <Text style={styles.itemName}>
+                      {item.name}: ${item.amount}
                     </Text>
-                    <Text style={styles.itemSubText}>
-                      First Date: {formatDate(new Date(exp.start_date))}
+                    <Text style={styles.itemDate}>
+                      First Date: {formatDate(new Date(item.start_date))}
                     </Text>
-                    {exp.repeat && exp.repeat > 0 && occurrences.length > 0 && (
-                      <View style={styles.occurrenceContainer}>
-                        <Text style={styles.occurrenceHeader}>
-                          Occurrences:
-                        </Text>
-                        {occurrences.map((date, idx) => (
-                          <Text key={idx} style={styles.occurrenceText}>
-                            {formatDate(date)}
+                    {/* If repeated, show the occurrences list */}
+                    {item.repeat &&
+                      item.repeat > 0 &&
+                      occurrences.length > 0 && (
+                        <View style={styles.occurrenceContainer}>
+                          <Text style={styles.occurrenceHeader}>
+                            Occurrences:
                           </Text>
-                        ))}
-                      </View>
-                    )}
+                          {occurrences.map((date, idx) => (
+                            <Text key={idx} style={styles.occurrenceText}>
+                              {formatDate(date)}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
                   </View>
-                );
-              })
-            )}
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionHeader}>Income</Text>
-            {incomeData.length === 0 ? (
-              <Text style={styles.emptyText}>No income found.</Text>
-            ) : (
-              incomeData.map((inc, index) => {
-                const occurrences = getOccurrences(
-                  inc,
-                  reportStartDate,
-                  reportEndDate
-                );
-                return (
-                  <View key={index} style={styles.item}>
-                    <Text style={styles.itemText}>
-                      {inc.name}: ${inc.amount}
-                    </Text>
-                    <Text style={styles.itemSubText}>
-                      First Date: {formatDate(new Date(inc.start_date))}
-                    </Text>
-                    {inc.repeat && inc.repeat > 0 && occurrences.length > 0 && (
-                      <View style={styles.occurrenceContainer}>
-                        <Text style={styles.occurrenceHeader}>
-                          Occurrences:
-                        </Text>
-                        {occurrences.map((date, idx) => (
-                          <Text key={idx} style={styles.occurrenceText}>
-                            {formatDate(date)}
-                          </Text>
-                        ))}
-                      </View>
-                    )}
-                  </View>
-                );
-              })
-            )}
-          </View>
-        </>
+                  {/* Show amount in color-coded style */}
+                  <Text
+                    style={[
+                      styles.itemAmount,
+                      activeTab === "expense"
+                        ? styles.expenseAmount
+                        : styles.incomeAmount,
+                    ]}
+                  >
+                    {activeTab === "expense" ? "-" : "+"}${item.amount}
+                  </Text>
+                </View>
+              );
+            })
+          )}
+        </ScrollView>
       )}
-    </ScrollView>
+    </View>
   );
 };
 
 export default ReportsScreen;
 
 const styles = StyleSheet.create({
+  /* Container for entire screen */
   container: {
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: "#fff",
     padding: 16,
-    backgroundColor: "white",
   },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
+
+  /* DATE ROW */
+  dateRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 16,
-    textAlign: "center",
+    marginTop: 50,
   },
-  dateContainer: {
-    marginBottom: 20,
+  dateButton: {
+    flexDirection: "row",
     alignItems: "center",
-  },
-  dateInput: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
     backgroundColor: "#f1f1f1",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 8,
-    marginVertical: 5,
+    width: "45%",
+    justifyContent: "space-between",
   },
   dateText: {
+    fontSize: 14,
+    color: "#333",
+    marginRight: 8,
+  },
+
+  /* CHART PLACEHOLDER */
+  chartContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  chartPlaceholder: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: "#e6e6e6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  chartValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+  },
+
+  /* TAB ROW (Expense/Income) */
+  tabRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 16,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: "#f1f1f1",
+    marginHorizontal: 4,
+    borderRadius: 25,
+    alignItems: "center",
+  },
+  tabButtonActiveExpense: {
+    backgroundColor: "#FF6B6B",
+  },
+  tabButtonActiveIncome: {
+    backgroundColor: "#2ecc71",
+  },
+  tabButtonText: {
     fontSize: 16,
+    fontWeight: "600",
     color: "#333",
   },
+  tabButtonTextActive: {
+    color: "#fff",
+  },
+
+  /* MAIN SCROLL AREA */
+  listContainer: {
+    marginTop: 10,
+  },
+
+  /* TOTALS */
   totalsContainer: {
     alignItems: "center",
     marginBottom: 20,
   },
   totalText: {
-    fontSize: 18,
-    marginVertical: 4,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionHeader: {
-    fontSize: 20,
+    fontSize: 16,
+    marginVertical: 2,
     fontWeight: "600",
-    marginBottom: 8,
+    color: "#333",
+  },
+
+  /* EMPTY LIST */
+  emptyText: {
+    fontSize: 16,
     textAlign: "center",
+    color: "#666",
+    marginVertical: 10,
   },
-  item: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+
+  /* ITEM STYLING */
+  itemContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
     backgroundColor: "#f9f9f9",
-    borderRadius: 6,
-    marginBottom: 6,
+    marginBottom: 10,
+    borderRadius: 10,
+    padding: 12,
   },
-  itemText: {
+  itemDetails: {
+    flex: 1,
+    marginRight: 10,
+  },
+  itemName: {
     fontSize: 16,
     fontWeight: "500",
+    color: "#333",
+    marginBottom: 2,
   },
-  itemSubText: {
+  itemDate: {
     fontSize: 14,
     color: "#666",
   },
+  itemAmount: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  expenseAmount: {
+    color: "#FF6B6B",
+  },
+  incomeAmount: {
+    color: "#2ecc71",
+  },
+
+  /* OCCURRENCE LIST */
   occurrenceContainer: {
     marginTop: 6,
     paddingLeft: 8,
@@ -365,15 +507,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#333",
+    marginBottom: 2,
   },
   occurrenceText: {
     fontSize: 14,
     color: "#555",
-  },
-  emptyText: {
-    fontSize: 16,
-    fontStyle: "italic",
-    textAlign: "center",
-    color: "#666",
   },
 });
