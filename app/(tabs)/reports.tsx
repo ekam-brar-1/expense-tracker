@@ -17,12 +17,8 @@ const ReportsScreen: React.FC = () => {
   const { user } = useAuth();
 
   // Date range
-  const [reportStartDate, setReportStartDate] = useState<Date>(
-    new Date(2024, 0, 1)
-  );
-  const [reportEndDate, setReportEndDate] = useState<Date>(
-    new Date(2025, 11, 31)
-  );
+  const [reportStartDate, setReportStartDate] = useState<Date>(new Date(2024, 0, 1));
+  const [reportEndDate, setReportEndDate] = useState<Date>(new Date(2025, 11, 31));
 
   // Totals
   const [totalExpenses, setTotalExpenses] = useState<number>(0);
@@ -36,8 +32,7 @@ const ReportsScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   // Date picker visibility
-  const [showStartDatePicker, setShowStartDatePicker] =
-    useState<boolean>(false);
+  const [showStartDatePicker, setShowStartDatePicker] = useState<boolean>(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false);
 
   // Toggle between Expense and Income
@@ -64,15 +59,11 @@ const ReportsScreen: React.FC = () => {
 
       // Calculate totals
       const totalExpensesCalc = expenseData.reduce((sum, exp) => {
-        return (
-          sum + computeTransactionTotal(exp, reportStartDate, reportEndDate)
-        );
+        return sum + computeTransactionTotal(exp, reportStartDate, reportEndDate);
       }, 0);
 
       const totalIncomeCalc = incomeData.reduce((sum, inc) => {
-        return (
-          sum + computeTransactionTotal(inc, reportStartDate, reportEndDate)
-        );
+        return sum + computeTransactionTotal(inc, reportStartDate, reportEndDate);
       }, 0);
 
       setTotalExpenses(totalExpensesCalc);
@@ -92,9 +83,7 @@ const ReportsScreen: React.FC = () => {
     const amount = transaction.amount;
     const repeat = transaction.repeat ?? 0;
     const startDate = new Date(transaction.start_date);
-    const endDate = transaction.end_date
-      ? new Date(transaction.end_date)
-      : null;
+    const endDate = transaction.end_date ? new Date(transaction.end_date) : null;
 
     if (endDate && endDate < rangeStart) return 0;
     if (startDate > rangeEnd) return 0;
@@ -126,9 +115,7 @@ const ReportsScreen: React.FC = () => {
     const occurrences: Date[] = [];
     const repeat = transaction.repeat ?? 0;
     const startDate = new Date(transaction.start_date);
-    const endDate = transaction.end_date
-      ? new Date(transaction.end_date)
-      : null;
+    const endDate = transaction.end_date ? new Date(transaction.end_date) : null;
 
     if (repeat === 0) {
       if (startDate >= rangeStart && startDate <= rangeEnd) {
@@ -179,25 +166,55 @@ const ReportsScreen: React.FC = () => {
     <ScrollView style={styles.container}>
       {/* DATE ROW */}
       <View style={styles.dateRow}>
-        <View style={styles.dateButton}>
-          <Text style={styles.dateText}>Start Date</Text>
-          <DateTimePicker
-            value={reportStartDate}
-            mode="date"
-            display="default"
-            onChange={handleStartDateChange}
-          />
-        </View>
-        <View style={styles.dateButton}>
-          <Text style={styles.dateText}>End Date</Text>
-          <DateTimePicker
-            value={reportEndDate}
-            mode="date"
-            display="default"
-            onChange={handleEndDateChange}
-          />
-        </View>
-      </View>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => setShowStartDatePicker(true)}
+        >
+          <Text style={styles.dateText}>
+            Start Date: 
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={styles.dateText}>
+             {formatDate(reportStartDate)}
+          </Text>
+          <Ionicons name="calendar" size={20} color="#333" />
+            </View>
+          {showStartDatePicker && (
+        <DateTimePicker
+          value={reportStartDate}
+          mode="date"
+          display="default"
+          onChange={handleStartDateChange}
+        />
+
+      )}
+    
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => setShowEndDatePicker(true)}
+        >
+          <Text style={styles.dateText}>
+            End Date: 
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={styles.dateText}>
+             {formatDate(reportEndDate)}
+          </Text>
+          <Ionicons name="calendar" size={20} color="#333" />
+           </View>
+          {showEndDatePicker && (
+        <DateTimePicker
+          value={reportEndDate}
+          mode="date"
+          display="default"
+          onChange={handleEndDateChange}
+        />
+      )}
+     
+        </TouchableOpacity>
+</View>
 
       {/* PIE CHART */}
       <View style={styles.chartContainer}>
@@ -249,11 +266,7 @@ const ReportsScreen: React.FC = () => {
 
       {/* LIST OF TRANSACTIONS */}
       {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="#333"
-          style={{ marginTop: 20 }}
-        />
+        <ActivityIndicator size="large" color="#333" style={{ marginTop: 20 }} />
       ) : (
         <ScrollView style={styles.listContainer}>
           {currentData.length === 0 ? (
@@ -262,11 +275,7 @@ const ReportsScreen: React.FC = () => {
             </Text>
           ) : (
             currentData.map((item, index) => {
-              const occurrences = getOccurrences(
-                item,
-                reportStartDate,
-                reportEndDate
-              );
+              const occurrences = getOccurrences(item, reportStartDate, reportEndDate);
               return (
                 <View key={index} style={styles.itemContainer}>
                   <View style={styles.itemDetails}>
@@ -278,9 +287,7 @@ const ReportsScreen: React.FC = () => {
                     </Text>
                     {item.repeat && occurrences.length > 0 && (
                       <View style={styles.occurrenceContainer}>
-                        <Text style={styles.occurrenceHeader}>
-                          Occurrences:
-                        </Text>
+                        <Text style={styles.occurrenceHeader}>Occurrences:</Text>
                         {occurrences.map((date, idx) => (
                           <Text key={idx} style={styles.occurrenceText}>
                             {formatDate(date)}
@@ -297,7 +304,7 @@ const ReportsScreen: React.FC = () => {
                         : styles.incomeAmount,
                     ]}
                   >
-                    {`${activeTab === "expense" ? "-" : "+"}$${item.amount}`}
+                    {activeTab === "expense" ? "-" : "+"}${item.amount}
                   </Text>
                 </View>
               );
@@ -320,7 +327,7 @@ const styles = StyleSheet.create({
   dateRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+   
     marginTop: 50,
   },
   dateButton: {
@@ -328,7 +335,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#ffffff",
     paddingVertical: 8,
-
+    paddingHorizontal: 12,
     borderRadius: 8,
     justifyContent: "space-between",
   },
