@@ -65,9 +65,9 @@ export default function HomeScreen() {
   const repeatValueMap: { [key: string]: number } = {
     No: 0,
     Daily: 1,
-    Weekly: 2,
-    "Bi-Weekly": 3,
-    Monthly: 4,
+    Weekly: 7,
+    "Bi-Weekly": 14,
+    Monthly: 30,
   };
 
   const formatDate = (selectedDate: Date): string => {
