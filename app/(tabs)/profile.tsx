@@ -1,13 +1,41 @@
 "use client";
 import { View, Text, Image, TouchableOpacity, Switch, Button, StyleSheet, Alert} from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../auth-context";
+import { supabase } from "../../lib/supabaseclient";
 
 
 export default function ProfileScreen() {
     const { user} = useAuth();
     const [isDarkMode, setIsDarkMode] = useState(false);
     const { logout } = useAuth();
+    const [firstName, setFirstName] = useState<string>("");
+
+    useEffect(() => {
+        const fetchUserFirstName = async () => {
+          if (!user) return;
+    
+          try {
+            const { data, error } = await supabase
+              .from("user_details")
+              .select("first_name")
+              .eq("user_id", user.id)
+              .single();
+    
+            if (error) throw error;
+    
+            if (data) {
+              setFirstName(data.first_name || "User");
+            }
+          } catch (error) {
+            console.error("Error fetching user first name:", error);
+            setFirstName("User");
+          }
+        };
+    
+        fetchUserFirstName();
+      }, [user]);
+    
 
     const handleDeleteAccount = () => {
         // TODO
@@ -32,7 +60,7 @@ export default function ProfileScreen() {
                     source={require("../../assets/account-icon.png")}
                 />
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{user?.first_name || "Placeholder"}</Text>
+                    <Text style={styles.userName}>{firstName|| "Placeholder"}</Text>
                     <Text style={styles.userEmail}>{user?.email}</Text>
                     
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
