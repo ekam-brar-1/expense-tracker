@@ -20,7 +20,7 @@ export default function AskAI() {
   // Retrieve your API key from Expo configuration
   const API_KEY =
     Constants.manifest?.extra?.GEMINI_API_KEY || Constants.expoConfig?.extra?.GEMINI_API_KEY;
-
+ console.log('API_KEY:', API_KEY); // Debugging line to check if the API key is retrieved correctly
   // Fetch all transactions (income and expense) from the past month for the current user
   const fetchMonthlyTransactions = async (userId: string) => {
     const oneMonthAgo = new Date();
