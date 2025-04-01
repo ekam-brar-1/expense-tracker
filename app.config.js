@@ -8,7 +8,7 @@ export default ({ config }) => {
     extra: {
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       supabaseKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
-      GEMINI_API_KEY : "AIzaSyD9URTuj02n70e99YqcTld4G4xEuINM93E",
+      GEMINI_API_KEY :process.env.GEMINI_API_KEY,
     },
   };
 };
