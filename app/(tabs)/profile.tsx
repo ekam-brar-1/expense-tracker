@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, Switch, Button, StyleSheet, Alert}
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../auth-context";
 import { supabase } from "../../lib/supabaseclient";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
     const { user} = useAuth();
@@ -51,6 +51,7 @@ export default function ProfileScreen() {
     
 
     return(
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
         <View style={styles.container}>
             
             {/* Profile Header  */}
@@ -106,6 +107,7 @@ export default function ProfileScreen() {
                 
             </View>
         </View>
+        </SafeAreaView>
     );
 }
 
