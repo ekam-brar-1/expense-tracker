@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { LogBox } from 'react-native';
 import {
   View,
   Text,
@@ -29,7 +30,7 @@ const ReportsScreen: React.FC = () => {
   // Fetched data
   const [expenseData, setExpenseData] = useState<Transaction[]>([]);
   const [incomeData, setIncomeData] = useState<Transaction[]>([]);
-
+LogBox.ignoreAllLogs(true);
   // Loading state
   const [loading, setLoading] = useState<boolean>(false);
 
