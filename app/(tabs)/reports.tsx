@@ -17,8 +17,10 @@ const ReportsScreen: React.FC = () => {
   const { user } = useAuth();
 
   // Date range
-  const [reportStartDate, setReportStartDate] = useState<Date>(new Date(2024, 0, 1));
-  const [reportEndDate, setReportEndDate] = useState<Date>(new Date(2025, 11, 31));
+  const DateBeforeAWeek= new Date();
+  DateBeforeAWeek.setDate(DateBeforeAWeek.getDate() - 7);
+  const [reportStartDate, setReportStartDate] = useState<Date>(DateBeforeAWeek); // 7 days ago
+  const [reportEndDate, setReportEndDate] = useState<Date>(new Date());
 
   // Totals
   const [totalExpenses, setTotalExpenses] = useState<number>(0);
