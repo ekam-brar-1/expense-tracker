@@ -23,6 +23,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+      "extra": {
+      "GEMINI_API_KEY": "AIzaSyCTcsYZztGzk9xn_pvNUbQVZA7_AqGDbsQ"
     }
   }
 }
