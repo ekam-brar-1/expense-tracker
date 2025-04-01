@@ -54,7 +54,7 @@ export default function ProfileScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
         <View style={styles.container}>
             
-            {/* Profile Header  */}
+         
             <View style={styles.profileHeader}>
                 <Image 
                     style={styles.profileImage}
