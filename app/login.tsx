@@ -19,13 +19,34 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Missing Information", "Please fill in both fields.");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
     try {
       await login(email, password);
-      // Navigate to the protected tabs layout after login
       router.replace("/(tabs)");
     } catch (error: any) {
-      Alert.alert("Login Error", error.message);
+      console.error("Login Error:", error); // Log error for debugging
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert("Login Failed", errorMessage);
     }
   };
 
@@ -73,6 +94,7 @@ export default function LoginScreen() {
   );
 }
 
+// (your styles stay the same)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
