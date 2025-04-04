@@ -80,79 +80,94 @@ export default function HomeScreen() {
     setDate(currentDate);
   };
 
-  const handleAddExpense = async (): Promise<void> => {
-    // Validate inputs
-    if (!name || !amount || !date) {
-      Alert.alert("Error", "Please fill in all fields");
+const handleAddExpense = async (): Promise<void> => {
+  try {
+    if (!name.trim() || !amount.trim() || !date) {
+      Alert.alert("Missing Fields", "Please fill in all fields.");
       return;
     }
 
-    // Validate user is logged in
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      Alert.alert("Invalid Amount", "Please enter a valid positive number.");
+      return;
+    }
+
     if (!user) {
-      Alert.alert("Error", "You must be logged in to add expenses");
+      Alert.alert("Authentication Error", "You must be logged in to add expenses.");
       return;
     }
 
-    try {
-      const { error } = await supabase.from("expenses").insert({
-        user_id: user.id,
-        name: name,
-        amount: parseFloat(amount),
-        start_date: formatDate(date),
-        repeat: repeatValueMap[repeat] || 0,
-      });
+    const { error } = await supabase.from("expenses").insert({
+      user_id: user.id,
+      name: name.trim(),
+      amount: parsedAmount,
+      start_date: formatDate(date),
+      repeat: repeatValueMap[repeat] ?? 0,
+    });
 
-      if (error) throw error;
-
-      // Clear inputs after successful submission
-      setName("");
-      setAmount("");
-      setDate(new Date());
-      setRepeat("");
-
-      Alert.alert("Success", "Expense added successfully");
-    } catch (error) {
-      console.error("Error adding expense:", error);
-      Alert.alert("Error", "Failed to add expense");
+    if (error) {
+      console.error("Supabase Error:", error);
+      throw error;
     }
-  };
 
-  const handleAddIncome = async (): Promise<void> => {
-    // Validate inputs
-    if (!name || !amount || !date) {
-      Alert.alert("Error", "Please fill in all fields");
+    // Clear form
+    setName("");
+    setAmount("");
+    setDate(new Date());
+    setRepeat("");
+
+    Alert.alert("Success", "Expense added successfully.");
+  } catch (error: any) {
+    console.error("Unexpected Error:", error);
+    Alert.alert("Error", error.message || "Failed to add expense. Please try again.");
+  }
+};
+
+const handleAddIncome = async (): Promise<void> => {
+  try {
+    if (!name.trim() || !amount.trim() || !date) {
+      Alert.alert("Missing Fields", "Please fill in all fields.");
       return;
     }
 
-    // Validate user is logged in
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      Alert.alert("Invalid Amount", "Please enter a valid positive number.");
+      return;
+    }
+
     if (!user) {
-      Alert.alert("Error", "You must be logged in to add income");
+      Alert.alert("Authentication Error", "You must be logged in to add income.");
       return;
     }
 
-    try {
-      const { error } = await supabase.from("income").insert({
-        user_id: user.id,
-        name: name,
-        amount: parseFloat(amount),
-        start_date: formatDate(date),
-        repeat: repeatValueMap[repeat] || 0,
-      });
+    const { error } = await supabase.from("income").insert({
+      user_id: user.id,
+      name: name.trim(),
+      amount: parsedAmount,
+      start_date: formatDate(date),
+      repeat: repeatValueMap[repeat] ?? 0,
+    });
 
-      if (error) throw error;
-
-      // Clear inputs after successful submission
-      setName("");
-      setAmount("");
-      setDate(new Date());
-      setRepeat("");
-
-      Alert.alert("Success", "Income added successfully");
-    } catch (error) {
-      console.error("Error adding income:", error);
-      Alert.alert("Error", "Failed to add income");
+    if (error) {
+      console.error("Supabase Error:", error);
+      throw error;
     }
-  };
+
+    // Clear form
+    setName("");
+    setAmount("");
+    setDate(new Date());
+    setRepeat("");
+
+    Alert.alert("Success", "Income added successfully.");
+  } catch (error: any) {
+    console.error("Unexpected Error:", error);
+    Alert.alert("Error", error.message || "Failed to add income. Please try again.");
+  }
+};
+
 
   const handleRepeatSelect = (option: string): void => {
     setRepeat(option);
