@@ -17,16 +17,14 @@ export default function AskAI() {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
-  // Retrieve your API key from Expo configuration
   const API_KEY =
     Constants.manifest?.extra?.GEMINI_API_KEY || Constants.expoConfig?.extra?.GEMINI_API_KEY;
- console.log('API_KEY:', API_KEY); // Debugging line to check if the API key is retrieved correctly
-  // Fetch all transactions (income and expense) from the past month for the current user
+ console.log('API_KEY:', API_KEY); 
   const fetchMonthlyTransactions = async (userId: string) => {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-    // Fetch expense transactions in the past month from the "expenses" table
+    
     const { data: expenseData, error: expenseError } = await supabase
       .from('expenses')
       .select('*')
@@ -38,7 +36,6 @@ export default function AskAI() {
       console.error('Error fetching expenses:', expenseError);
     }
 
-    // Fetch income transactions in the past month from the "income" table
     const { data: incomeData, error: incomeError } = await supabase
       .from('income')
       .select('*')

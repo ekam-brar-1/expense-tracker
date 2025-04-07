@@ -17,29 +17,27 @@ import { fetchTransactions, Transaction } from "../../lib/fetchTransactions";
 const ReportsScreen: React.FC = () => {
   const { user } = useAuth();
 
-  // Date range
+ 
   const DateBeforeAWeek = new Date();
   DateBeforeAWeek.setDate(DateBeforeAWeek.getDate() - 7);
   const [reportStartDate, setReportStartDate] = useState<Date>(DateBeforeAWeek); // 7 days ago
   const [reportEndDate, setReportEndDate] = useState<Date>(new Date());
 
-  // Totals
+ 
   const [totalExpenses, setTotalExpenses] = useState<number>(0);
   const [totalIncome, setTotalIncome] = useState<number>(0);
 
-  // Fetched data
+  
   const [expenseData, setExpenseData] = useState<Transaction[]>([]);
   const [incomeData, setIncomeData] = useState<Transaction[]>([]);
   LogBox.ignoreAllLogs(true);
-  // Loading state
+
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Date picker visibility
   const [showStartDatePicker, setShowStartDatePicker] =
     useState<boolean>(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false);
 
-  // Toggle between Expense and Income
   const [activeTab, setActiveTab] = useState<"expense" | "income">("expense");
 
   useEffect(() => {
@@ -61,7 +59,7 @@ const ReportsScreen: React.FC = () => {
       setExpenseData(expenseData);
       setIncomeData(incomeData);
 
-      // Calculate totals
+    
       const totalExpensesCalc = expenseData.reduce((sum, exp) => {
         return (
           sum + computeTransactionTotal(exp, reportStartDate, reportEndDate)
@@ -217,7 +215,7 @@ const ReportsScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* PIE CHART */}
+   
       <View style={styles.chartContainer}>
         <NetPieChart
           totalExpenses={totalExpenses}
@@ -225,7 +223,7 @@ const ReportsScreen: React.FC = () => {
         />
       </View>
 
-      {/* TOTALS */}
+   
       <View style={styles.totalsContainer}>
         <Text style={styles.totalText}>
           Total Expenses: {totalExpenses.toFixed(2)}
@@ -236,7 +234,7 @@ const ReportsScreen: React.FC = () => {
         <Text style={styles.totalText}>Net: {netValue.toFixed(2)}</Text>
       </View>
 
-      {/* TAB TOGGLE */}
+     
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[
@@ -272,7 +270,7 @@ const ReportsScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* LIST OF TRANSACTIONS */}
+   
       {loading ? (
         <ActivityIndicator
           size="large"
@@ -351,7 +349,7 @@ const styles = StyleSheet.create({
   dateButton: {
     flexDirection: "column",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+     backgroundColor: "#f1f1f1",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
