@@ -37,51 +37,55 @@ export default function ProfileScreen() {
       }, [user]);
     
 
-const handleDeleteAccount = async () => {
-  Alert.alert(
-    "Confirm Account Deletion",
-    "Are you sure you want to permanently delete your account?",
-    [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-            if (sessionError || !sessionData.session) {
-              throw new Error('Could not get user session.');
-            }
-
-            const accessToken = sessionData.session.access_token;
-
-            const response = await fetch('https://fzqovfkwzunvgxjmtfob.functions.supabase.co/delete-user', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-              },
-              body: JSON.stringify({ userId: user.id }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-              throw new Error(data.error || 'Failed to delete user.');
-            }
-
-            Alert.alert('Success', 'Your account was deleted.');
-            await logout();
-
-          } catch (error) {
-            console.error('Account deletion error:', error);
-            Alert.alert('Error', error.message || 'An error occurred.');
-          }
-        }
+const handleDeleteAccount = () => {
+  Alert.prompt(
+    "Confirm Password",
+    "Enter your password to delete your account:",
+    async (password) => {
+      if (!password) {
+        Alert.alert('Error', 'Password is required.');
+        return;
       }
-    ]
+
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) {
+          throw new Error('Could not get user session.');
+        }
+
+        const accessToken = sessionData.session.access_token;
+
+        const response = await fetch('https://fzqovfkwzunvgxjmtfob.functions.supabase.co/delete-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            email: user.email,
+            password: password
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to delete user.');
+        }
+
+        Alert.alert('Success', 'Your account was deleted.');
+        await logout();
+
+      } catch (error) {
+        console.error('Account deletion error:', error);
+        Alert.alert('Error', error.message || 'An error occurred.');
+      }
+    },
+    'secure-text'
   );
 };
+
 
 
 

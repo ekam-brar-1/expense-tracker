@@ -1,11 +1,11 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 
 serve(async (req) => {
-  const { userId } = await req.json();
+  const { userId, email, password } = await req.json();
 
-  if (!userId) {
-    return new Response(JSON.stringify({ error: 'User ID is required' }), {
+  if (!userId || !email || !password) {
+    return new Response(JSON.stringify({ error: 'User ID, Email, and Password are required' }), {
       headers: { 'Content-Type': 'application/json' },
       status: 400,
     });
@@ -16,28 +16,23 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  // Delete from user_details table
-  const { error: deleteDetailsError } = await supabaseAdmin
-    .from('user_details')
-    .delete()
-    .eq('user_id', userId);
+  // Try signing in with provided email and password
+  const { data, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (deleteDetailsError) {
-    return new Response(JSON.stringify({ error: deleteDetailsError.message }), {
+  if (signInError) {
+    console.error('Password verification failed:', signInError);
+    return new Response(JSON.stringify({ error: 'Invalid password' }), {
       headers: { 'Content-Type': 'application/json' },
-      status: 400,
+      status: 401,
     });
   }
 
-  // Delete user from Supabase Auth
-  const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);
-
-  if (deleteAuthError) {
-    return new Response(JSON.stringify({ error: deleteAuthError.message }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 400,
-    });
-  }
+  // Password correct, proceed to delete
+  await supabaseAdmin.from('user_details').delete().eq('user_id', userId);
+  await supabaseAdmin.auth.admin.deleteUser(userId);
 
   return new Response(JSON.stringify({ message: 'User successfully deleted' }), {
     headers: { 'Content-Type': 'application/json' },
