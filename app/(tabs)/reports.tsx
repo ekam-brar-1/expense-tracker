@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { LogBox } from 'react-native';
+import { LogBox } from "react-native";
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ const ReportsScreen: React.FC = () => {
   const { user } = useAuth();
 
   // Date range
-  const DateBeforeAWeek= new Date();
+  const DateBeforeAWeek = new Date();
   DateBeforeAWeek.setDate(DateBeforeAWeek.getDate() - 7);
   const [reportStartDate, setReportStartDate] = useState<Date>(DateBeforeAWeek); // 7 days ago
   const [reportEndDate, setReportEndDate] = useState<Date>(new Date());
@@ -30,12 +30,13 @@ const ReportsScreen: React.FC = () => {
   // Fetched data
   const [expenseData, setExpenseData] = useState<Transaction[]>([]);
   const [incomeData, setIncomeData] = useState<Transaction[]>([]);
-LogBox.ignoreAllLogs(true);
+  LogBox.ignoreAllLogs(true);
   // Loading state
   const [loading, setLoading] = useState<boolean>(false);
 
   // Date picker visibility
-  const [showStartDatePicker, setShowStartDatePicker] = useState<boolean>(false);
+  const [showStartDatePicker, setShowStartDatePicker] =
+    useState<boolean>(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false);
 
   // Toggle between Expense and Income
@@ -62,11 +63,15 @@ LogBox.ignoreAllLogs(true);
 
       // Calculate totals
       const totalExpensesCalc = expenseData.reduce((sum, exp) => {
-        return sum + computeTransactionTotal(exp, reportStartDate, reportEndDate);
+        return (
+          sum + computeTransactionTotal(exp, reportStartDate, reportEndDate)
+        );
       }, 0);
 
       const totalIncomeCalc = incomeData.reduce((sum, inc) => {
-        return sum + computeTransactionTotal(inc, reportStartDate, reportEndDate);
+        return (
+          sum + computeTransactionTotal(inc, reportStartDate, reportEndDate)
+        );
       }, 0);
 
       setTotalExpenses(totalExpensesCalc);
@@ -86,7 +91,9 @@ LogBox.ignoreAllLogs(true);
     const amount = transaction.amount;
     const repeat = transaction.repeat ?? 0;
     const startDate = new Date(transaction.start_date);
-    const endDate = transaction.end_date ? new Date(transaction.end_date) : null;
+    const endDate = transaction.end_date
+      ? new Date(transaction.end_date)
+      : null;
 
     if (endDate && endDate < rangeStart) return 0;
     if (startDate > rangeEnd) return 0;
@@ -118,7 +125,9 @@ LogBox.ignoreAllLogs(true);
     const occurrences: Date[] = [];
     const repeat = transaction.repeat ?? 0;
     const startDate = new Date(transaction.start_date);
-    const endDate = transaction.end_date ? new Date(transaction.end_date) : null;
+    const endDate = transaction.end_date
+      ? new Date(transaction.end_date)
+      : null;
 
     if (repeat === 0) {
       if (startDate >= rangeStart && startDate <= rangeEnd) {
@@ -173,13 +182,9 @@ LogBox.ignoreAllLogs(true);
           style={styles.dateButton}
           onPress={() => setShowStartDatePicker(true)}
         >
-          <Text style={styles.dateText}>
-            Start Date: 
-          </Text>
+          <Text style={styles.dateText}>Start Date:</Text>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={styles.dateText}>
-              {formatDate(reportStartDate)}
-            </Text>
+            <Text style={styles.dateText}>{formatDate(reportStartDate)}</Text>
             <Ionicons name="calendar" size={20} color="#333" />
           </View>
           {showStartDatePicker && (
@@ -196,36 +201,39 @@ LogBox.ignoreAllLogs(true);
           style={styles.dateButton}
           onPress={() => setShowEndDatePicker(true)}
         >
-          <Text style={styles.dateText}>
-            End Date: 
-          </Text>
+          <Text style={styles.dateText}>End Date:</Text>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={styles.dateText}>
-              {formatDate(reportEndDate)}
-            </Text>
+            <Text style={styles.dateText}>{formatDate(reportEndDate)}</Text>
             <Ionicons name="calendar" size={20} color="#333" />
           </View>
           {showEndDatePicker && (
             <DateTimePicker
-            value={reportEndDate}
-            mode="date"
-            display="default"
-            onChange={handleEndDateChange}
-          />
-        )}
+              value={reportEndDate}
+              mode="date"
+              display="default"
+              onChange={handleEndDateChange}
+            />
+          )}
         </TouchableOpacity>
       </View>
 
       {/* PIE CHART */}
       <View style={styles.chartContainer}>
-        <NetPieChart totalExpenses={totalExpenses} totalIncome={totalIncome} />
+        <NetPieChart
+          totalExpenses={totalExpenses}
+          totalIncome={parseFloat(totalIncome.toFixed(2))}
+        />
       </View>
 
       {/* TOTALS */}
       <View style={styles.totalsContainer}>
-        <Text style={styles.totalText}>Total Expenses: {totalExpenses}</Text>
-        <Text style={styles.totalText}>Total Income: {totalIncome}</Text>
-        <Text style={styles.totalText}>Net: {netValue}</Text>
+        <Text style={styles.totalText}>
+          Total Expenses: {totalExpenses.toFixed(2)}
+        </Text>
+        <Text style={styles.totalText}>
+          Total Income: {totalIncome.toFixed(2)}
+        </Text>
+        <Text style={styles.totalText}>Net: {netValue.toFixed(2)}</Text>
       </View>
 
       {/* TAB TOGGLE */}
@@ -266,7 +274,11 @@ LogBox.ignoreAllLogs(true);
 
       {/* LIST OF TRANSACTIONS */}
       {loading ? (
-        <ActivityIndicator size="large" color="#333" style={{ marginTop: 20 }} />
+        <ActivityIndicator
+          size="large"
+          color="#333"
+          style={{ marginTop: 20 }}
+        />
       ) : (
         <ScrollView style={styles.listContainer}>
           {currentData.length === 0 ? (
@@ -275,7 +287,11 @@ LogBox.ignoreAllLogs(true);
             </Text>
           ) : (
             currentData.map((item, index) => {
-              const occurrences = getOccurrences(item, reportStartDate, reportEndDate);
+              const occurrences = getOccurrences(
+                item,
+                reportStartDate,
+                reportEndDate
+              );
               return (
                 <View key={index} style={styles.itemContainer}>
                   <View style={styles.itemDetails}>
@@ -287,7 +303,9 @@ LogBox.ignoreAllLogs(true);
                     </Text>
                     {item.repeat && occurrences.length > 0 && (
                       <View style={styles.occurrenceContainer}>
-                        <Text style={styles.occurrenceHeader}>Occurrences:</Text>
+                        <Text style={styles.occurrenceHeader}>
+                          Occurrences:
+                        </Text>
                         {occurrences.map((date, idx) => (
                           <Text key={idx} style={styles.occurrenceText}>
                             {formatDate(date)}
@@ -327,7 +345,7 @@ const styles = StyleSheet.create({
   dateRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-   
+
     marginTop: 50,
   },
   dateButton: {
