@@ -17,9 +17,8 @@ import { supabase } from "../../lib/supabaseclient";
 import { useRouter } from "expo-router";
 import { useAuth } from "../auth-context";
 
-// Define types outside of the component
 type Transaction = {
-  id?: string; // Add ID field for better tracking
+  id?: string;
   user_id: number;
   name: string;
   amount: number;
@@ -34,7 +33,6 @@ type RepeatOption = {
   value: number;
 };
 
-// Constants moved outside component
 const REPEAT_OPTIONS: RepeatOption[] = [
   { label: "No", value: 0 },
   { label: "Daily", value: 1 },
@@ -47,7 +45,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
 
-  // State management
   const [firstName, setFirstName] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
@@ -63,12 +60,10 @@ export default function HomeScreen() {
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Format date helper
   const formatDate = (selectedDate: Date): string => {
     return selectedDate.toISOString().split("T")[0];
   };
 
-  // Fetch user data
   const fetchUserFirstName = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
@@ -90,13 +85,11 @@ export default function HomeScreen() {
     }
   }, [user]);
 
-  // Fetch transactions
   const fetchRecentTransactions = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
 
     try {
-      // Fetch expenses
       const { data: expenses, error: expensesError } = await supabase
         .from("expenses")
         .select("user_id, name, amount, start_date, creation_date, repeat")
@@ -106,7 +99,6 @@ export default function HomeScreen() {
 
       if (expensesError) throw expensesError;
 
-      // Fetch income
       const { data: income, error: incomeError } = await supabase
         .from("income")
         .select("user_id, name, amount, start_date, creation_date, repeat")
@@ -116,7 +108,6 @@ export default function HomeScreen() {
 
       if (incomeError) throw incomeError;
 
-      // Process and combine data
       const expensesWithType = expenses.map((item) => ({
         ...item,
         type: "expense" as const,
@@ -129,7 +120,6 @@ export default function HomeScreen() {
         creation_date: item.creation_date,
       }));
 
-      // Sort and limit combined results
       const combined = [...expensesWithType, ...incomeWithType]
         .sort(
           (a, b) =>
@@ -147,13 +137,11 @@ export default function HomeScreen() {
     }
   }, [user]);
 
-  // Initial data loading
   useEffect(() => {
     fetchUserFirstName();
     fetchRecentTransactions();
   }, [fetchUserFirstName, fetchRecentTransactions]);
 
-  // Form input handlers
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -170,7 +158,10 @@ export default function HomeScreen() {
     setRepeatModalVisible(false);
   };
 
-  // Form submission
+  const navigateToAllTransactions = () => {
+    router.push("/all-transactions");
+  };
+
   const validateForm = (): boolean => {
     const { name, amount, date } = formData;
 
@@ -202,7 +193,6 @@ export default function HomeScreen() {
     const { name, amount, date, repeat } = formData;
     const parsedAmount = parseFloat(amount);
 
-    // Find repeat value from selected option
     const selectedRepeat = REPEAT_OPTIONS.find(
       (option) => option.label === repeat
     );
@@ -221,7 +211,6 @@ export default function HomeScreen() {
 
       if (error) throw error;
 
-      // Reset form and refresh data
       setFormData({
         name: "",
         amount: "",
@@ -245,13 +234,11 @@ export default function HomeScreen() {
     }
   };
 
-  // Helper for transaction display
   const getRepeatLabel = (value: number): string => {
     const option = REPEAT_OPTIONS.find((opt) => opt.value === value);
     return option?.label || "No";
   };
 
-  // UI Components
   const renderTransactionCard = (transaction: Transaction, index: number) => {
     const uniqueKey =
       transaction.id ||
@@ -303,7 +290,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Logo and welcome section */}
         <View style={styles.logoContainer}>
           <Image
             source={require("../../assets/spendsavvy.png")}
@@ -313,9 +299,7 @@ export default function HomeScreen() {
           <Text style={styles.welcomeText}>Welcome, {firstName}</Text>
         </View>
 
-        {/* Form section */}
         <View style={styles.inputSection}>
-          {/* Name input */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Name:</Text>
             <TextInput
@@ -327,7 +311,6 @@ export default function HomeScreen() {
             />
           </View>
 
-          {/* Amount input */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Amount:</Text>
             <TextInput
@@ -340,7 +323,6 @@ export default function HomeScreen() {
             />
           </View>
 
-          {/* Date picker */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Date:</Text>
             <TouchableOpacity
@@ -362,7 +344,6 @@ export default function HomeScreen() {
             )}
           </View>
 
-          {/* Repeat selector */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Repeat:</Text>
             <TouchableOpacity
@@ -375,7 +356,6 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Repeat options modal */}
           <Modal
             transparent={true}
             visible={isRepeatModalVisible}
@@ -404,7 +384,6 @@ export default function HomeScreen() {
             </View>
           </Modal>
 
-          {/* Action buttons */}
           <View style={styles.actionButtons}>
             <TouchableOpacity
               style={styles.expenseButton}
@@ -423,9 +402,16 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Recent transactions section */}
         <View style={styles.recentTransactionsSection}>
-          <Text style={styles.sectionTitle}>Recent Transactions</Text>
+          <View style={styles.sectionHeaderContainer}>
+            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <TouchableOpacity
+              style={styles.viewAllButton}
+              onPress={navigateToAllTransactions}
+            >
+              <Text style={styles.viewAllButtonText}>View all</Text>
+            </TouchableOpacity>
+          </View>
 
           {isLoading && recentTransactions.length === 0 ? (
             <Text style={styles.loadingText}>Loading transactions...</Text>
@@ -445,7 +431,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  // Existing styles...
   container: {
     flex: 1,
     backgroundColor: "white",
@@ -558,11 +543,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 30,
   },
+  sectionHeaderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 15,
     color: "#333",
+  },
+  viewAllButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  viewAllButtonText: {
+    color: "#4a6da7",
+    fontWeight: "600",
+    fontSize: 14,
   },
   transactionCard: {
     flexDirection: "row",
