@@ -23,6 +23,7 @@ type Transaction = {
   name: string;
   amount: number;
   start_date: string;
+  end_date?: string;
   creation_date: string;
   type: "expense" | "income";
   repeat?: number;
@@ -50,9 +51,14 @@ export default function HomeScreen() {
     name: "",
     amount: "",
     date: new Date(),
+    endDate: new Date(),
     repeat: "",
   });
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false);
+  const [activeDateField, setActiveDateField] = useState<"date" | "endDate">(
+    "date"
+  );
   const [isRepeatModalVisible, setRepeatModalVisible] =
     useState<boolean>(false);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(
@@ -92,7 +98,9 @@ export default function HomeScreen() {
     try {
       const { data: expenses, error: expensesError } = await supabase
         .from("expenses")
-        .select("user_id, name, amount, start_date, creation_date, repeat")
+        .select(
+          "user_id, name, amount, start_date, end_date, creation_date, repeat"
+        )
         .eq("user_id", user.id)
         .order("creation_date", { ascending: false })
         .limit(3);
@@ -101,7 +109,9 @@ export default function HomeScreen() {
 
       const { data: income, error: incomeError } = await supabase
         .from("income")
-        .select("user_id, name, amount, start_date, creation_date, repeat")
+        .select(
+          "user_id, name, amount, start_date, end_date, creation_date, repeat"
+        )
         .eq("user_id", user.id)
         .order("creation_date", { ascending: false })
         .limit(3);
@@ -147,9 +157,14 @@ export default function HomeScreen() {
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
+    if (activeDateField === "date") {
+      setShowDatePicker(false);
+    } else {
+      setShowEndDatePicker(false);
+    }
+
     if (selectedDate) {
-      handleInputChange("date", selectedDate);
+      handleInputChange(activeDateField, selectedDate);
     }
   };
 
@@ -163,9 +178,9 @@ export default function HomeScreen() {
   };
 
   const validateForm = (): boolean => {
-    const { name, amount, date } = formData;
+    const { name, amount, date, endDate } = formData;
 
-    if (!name.trim() || !amount.trim() || !date) {
+    if (!name.trim() || !amount.trim() || !date || !endDate) {
       Alert.alert("Missing Fields", "Please fill in all fields.");
       return false;
     }
@@ -173,6 +188,11 @@ export default function HomeScreen() {
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       Alert.alert("Invalid Amount", "Please enter a valid positive number.");
+      return false;
+    }
+
+    if (new Date(endDate) < new Date(date)) {
+      Alert.alert("Invalid Dates", "End date cannot be before start date.");
       return false;
     }
 
@@ -190,7 +210,7 @@ export default function HomeScreen() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    const { name, amount, date, repeat } = formData;
+    const { name, amount, date, endDate, repeat } = formData;
     const parsedAmount = parseFloat(amount);
 
     const selectedRepeat = REPEAT_OPTIONS.find(
@@ -206,6 +226,7 @@ export default function HomeScreen() {
           name: name.trim(),
           amount: parsedAmount,
           start_date: formatDate(date),
+          end_date: formatDate(endDate),
           repeat: repeatValue,
         });
 
@@ -215,6 +236,7 @@ export default function HomeScreen() {
         name: "",
         amount: "",
         date: new Date(),
+        endDate: new Date(),
         repeat: "",
       });
 
@@ -282,6 +304,11 @@ export default function HomeScreen() {
             {transaction.amount.toFixed(2)}
           </Text>
           <Text style={styles.transactionDate}>{transaction.start_date}</Text>
+          {transaction.end_date && (
+            <Text style={styles.transactionDate}>
+              to {transaction.end_date}
+            </Text>
+          )}
         </View>
       </View>
     );
@@ -327,7 +354,10 @@ export default function HomeScreen() {
             <Text style={styles.inputLabel}>Date:</Text>
             <TouchableOpacity
               style={styles.input}
-              onPress={() => setShowDatePicker(true)}
+              onPress={() => {
+                setActiveDateField("date");
+                setShowDatePicker(true);
+              }}
             >
               <Text style={styles.inputText}>{formatDate(formData.date)}</Text>
             </TouchableOpacity>
@@ -336,6 +366,32 @@ export default function HomeScreen() {
               <DateTimePicker
                 testID="dateTimePicker"
                 value={formData.date}
+                mode="date"
+                is24Hour={true}
+                display="default"
+                onChange={handleDateChange}
+              />
+            )}
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>End Date:</Text>
+            <TouchableOpacity
+              style={styles.input}
+              onPress={() => {
+                setActiveDateField("endDate");
+                setShowEndDatePicker(true);
+              }}
+            >
+              <Text style={styles.inputText}>
+                {formatDate(formData.endDate)}
+              </Text>
+            </TouchableOpacity>
+
+            {showEndDatePicker && (
+              <DateTimePicker
+                testID="endDateTimePicker"
+                value={formData.endDate}
                 mode="date"
                 is24Hour={true}
                 display="default"
