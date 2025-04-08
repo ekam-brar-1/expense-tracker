@@ -123,7 +123,7 @@ const handleDeleteAccount = () => {
             <View style={styles.section}>
                 
                 <View style={styles.sectionHeading}>
-                  <Image style={styles.iconImage} source={require("../../assets/account-icon.png")}/>
+                  <Image style={styles.iconImage} source={require("../../assets/settings.png")}/>
                   <Text style={styles.sectionTitle}>Settings</Text>
                 </View>
                 
