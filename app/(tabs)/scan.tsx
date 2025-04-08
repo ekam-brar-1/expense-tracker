@@ -1,24 +1,53 @@
-import { View, Text, TouchableOpacity, Button, StyleSheet, Alert, ActivityIndicator} from "react-native";
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import { View, Text, TouchableOpacity, Button, StyleSheet, Alert, ActivityIndicator, M} from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { useState, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useAuth } from "../auth-context";
+import { supabase } from "../../lib/supabaseclient";
 
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [flash, setFlash] = useState(false);
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [processingToken, setProcessingToken] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
   const [scanResult, setScanResult] = useState<any>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const { user } = useAuth();
+  
+  const handleAddTransaction = async (type: "expense"): 
+      Promise<void> => {
+      // if (!validateForm()) return;  TODO add validation later
+      setIsSaving(true);
+      try {
+        const { error } = await supabase
+          .from("expenses")
+          .insert({
+            user_id: user?.id,
+            name: scanResult.result.establishment,
+            amount: scanResult.result.total.toFixed(2),
+            start_date: scanResult.result.date,
+            repeat: 0,
+        });
+  
+        if (error) throw error;
+        Alert.alert("Expense added succesfully");
+        setUri(null);
+        setScanResult(null);
+      } catch (error: any) {
+        console.error(`Error adding expense:`, error);
+        Alert.alert("Error", error.message || `Failed to add expense. Please try again.`);
+      } finally {
+        setIsSaving(false);
+      }
+    };
 
   //helper function to implement wait
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   //this function uploads the reciept to tabscanner api (function > supabase edge function > tabscanner) and returns the id for the scanned reciept
-  //need another function to call the results endpoint with receipt id to get the results
   const uploadImage = async () => {
     if (!uri) return;
 
@@ -30,7 +59,6 @@ export default function ScanScreen() {
         name: 'reciept.jpg',
         type: 'image/jpeg',
       } as any);
-
       const response = await fetch(
         'https://fzqovfkwzunvgxjmtfob.supabase.co/functions/v1/super-task', 
         {
@@ -38,12 +66,8 @@ export default function ScanScreen() {
           body: formData,
         },
       );
-
       const data = await response.json();
       if (data.error) throw data.error;
-      
-      console.log(data.token)
-      setProcessingToken(data.token);
       await sleep (10000)
       setUploading(false)
       checkResult(data.token);
@@ -54,7 +78,6 @@ export default function ScanScreen() {
     } 
   }
 
-  // Add result checking logic
   const checkResult = async (token: string) => {
     try {
       const response = await fetch(`https://fzqovfkwzunvgxjmtfob.supabase.co/functions/v1/hyper-service?token=${token}`);
@@ -68,13 +91,39 @@ export default function ScanScreen() {
       }
   };
     
-    
-
-
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
     setUri(photo?.uri);
   };
+
+  const renderResultActions = () => (
+    <View style={styles.actionContainer}>
+      {/* Retake Button */}
+      <TouchableOpacity
+        style={[styles.button, styles.cancelButton]}
+        onPress={() => {
+          setUri(null);
+          setScanResult(null);
+        }}
+        disabled={isSaving}
+      >
+        <Text style={styles.buttonText}>Retake</Text>
+      </TouchableOpacity>
+  
+      {/* Add Expense Button */}
+      <TouchableOpacity
+        style={[styles.button, styles.confirmButton]}
+        onPress={() => handleAddTransaction("expense")}
+        disabled={isSaving}
+      >
+        {isSaving ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text style={styles.buttonText}>Add Expense</Text>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
 
   const renderPicture = () => {
     return (
@@ -88,29 +137,30 @@ export default function ScanScreen() {
           {scanResult && (
           <View style={styles.resultContainer}>
             <Text style={styles.resultText}>
+              Merchant: {scanResult.result.establishment}
+            </Text>
+            <Text style={styles.resultText}>
               Total: ${scanResult.result.total?.toFixed(2)}
             </Text>
             <Text style={styles.resultText}>
               Date: {new Date(scanResult.result.date).toLocaleDateString()}
             </Text>
-            <Text style={styles.resultText}>
-              Merchant: {scanResult.result.establishment}
-            </Text>
+            {renderResultActions()}
           </View>
-        )}
+          )}
+
           {isProcessing && (
           <View style={styles.processingOverlay}>
             <ActivityIndicator size="large" color="white" />
             <Text style={styles.processingText}>Processing...</Text>
           </View>
-        )}
+          )}
         </View>
         
         <View style={styles.buttonGroup}>
           <Button 
             onPress={() => {
               setUri(null);
-              setProcessingToken(null);
               setScanResult(null);
             }} 
             title="Retake" 
@@ -121,9 +171,7 @@ export default function ScanScreen() {
             title={uploading ? "Uploading..." : "Upload"}
             disabled={uploading || isProcessing}
           />
-        </View>
-
-          
+        </View>  
       </View>
     );
   };
@@ -160,7 +208,6 @@ export default function ScanScreen() {
   const toggleFlash = () => {
     setFlash((prev) => !prev);
   };
-
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -266,5 +313,28 @@ const styles = StyleSheet.create({
     resultText: {
       fontSize: 16,
       marginVertical: 4,
+    },
+    actionContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+      gap: 10,
+    },
+    button: {
+      flex: 1,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cancelButton: {
+      backgroundColor: '#ff4444',
+    },
+    confirmButton: {
+      backgroundColor: '#2196F3',
+    },
+    buttonText: {
+      color: 'white',
+      fontWeight: 'bold',
     },
   });
