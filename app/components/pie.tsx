@@ -40,7 +40,7 @@ const NetPieChart: React.FC<NetPieChartProps> = ({
         cover={0.6} // cover value creates a donut chart effect
       />
       <View style={styles.centerLabel}>
-        <Text style={styles.netText}>Net: ${netValue}</Text>
+        <Text style={styles.netText}>Net: ${netValue.toFixed(2)}</Text>
       </View>
     </View>
   );

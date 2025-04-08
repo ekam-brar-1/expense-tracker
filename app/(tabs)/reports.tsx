@@ -17,17 +17,14 @@ import { fetchTransactions, Transaction } from "../../lib/fetchTransactions";
 const ReportsScreen: React.FC = () => {
   const { user } = useAuth();
 
- 
   const DateBeforeAWeek = new Date();
   DateBeforeAWeek.setDate(DateBeforeAWeek.getDate() - 7);
   const [reportStartDate, setReportStartDate] = useState<Date>(DateBeforeAWeek); // 7 days ago
   const [reportEndDate, setReportEndDate] = useState<Date>(new Date());
 
- 
   const [totalExpenses, setTotalExpenses] = useState<number>(0);
   const [totalIncome, setTotalIncome] = useState<number>(0);
 
-  
   const [expenseData, setExpenseData] = useState<Transaction[]>([]);
   const [incomeData, setIncomeData] = useState<Transaction[]>([]);
   LogBox.ignoreAllLogs(true);
@@ -59,7 +56,6 @@ const ReportsScreen: React.FC = () => {
       setExpenseData(expenseData);
       setIncomeData(incomeData);
 
-    
       const totalExpensesCalc = expenseData.reduce((sum, exp) => {
         return (
           sum + computeTransactionTotal(exp, reportStartDate, reportEndDate)
@@ -215,7 +211,6 @@ const ReportsScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-   
       <View style={styles.chartContainer}>
         <NetPieChart
           totalExpenses={totalExpenses}
@@ -223,7 +218,6 @@ const ReportsScreen: React.FC = () => {
         />
       </View>
 
-   
       <View style={styles.totalsContainer}>
         <Text style={styles.totalText}>
           Total Expenses: {totalExpenses.toFixed(2)}
@@ -234,7 +228,6 @@ const ReportsScreen: React.FC = () => {
         <Text style={styles.totalText}>Net: {netValue.toFixed(2)}</Text>
       </View>
 
-     
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[
@@ -270,7 +263,6 @@ const ReportsScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-   
       {loading ? (
         <ActivityIndicator
           size="large"
@@ -349,7 +341,7 @@ const styles = StyleSheet.create({
   dateButton: {
     flexDirection: "column",
     alignItems: "center",
-     backgroundColor: "#f1f1f1",
+    backgroundColor: "#f1f1f1",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,

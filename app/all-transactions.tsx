@@ -53,7 +53,7 @@ export default function AllTransactionsScreen() {
     setIsLoading(true);
 
     try {
-      const { data: expenses, error: expensesError } = await supabase
+      const { data: expenses } = await supabase
         .from("expenses")
         .select(
           "expense_id, user_id, name, amount, start_date, end_date, creation_date, repeat"
@@ -61,9 +61,7 @@ export default function AllTransactionsScreen() {
         .eq("user_id", user.id)
         .order("creation_date", { ascending: false });
 
-      if (expensesError) throw expensesError;
-
-      const { data: income, error: incomeError } = await supabase
+      const { data: income } = await supabase
         .from("income")
         .select(
           "income_id, user_id, name, amount, start_date, end_date, creation_date, repeat"
@@ -71,14 +69,12 @@ export default function AllTransactionsScreen() {
         .eq("user_id", user.id)
         .order("creation_date", { ascending: false });
 
-      if (incomeError) throw incomeError;
-
-      const expensesWithType = expenses.map((item) => ({
+      const expensesWithType = (expenses || []).map((item) => ({
         ...item,
         type: "expense" as const,
       }));
 
-      const incomeWithType = income.map((item) => ({
+      const incomeWithType = (income || []).map((item) => ({
         ...item,
         type: "income" as const,
       }));
@@ -104,21 +100,15 @@ export default function AllTransactionsScreen() {
     setIsDeleting(true);
     try {
       if (transaction.type === "expense" && transaction.expense_id) {
-        const { error } = await supabase
+        await supabase
           .from("expenses")
           .delete()
           .eq("expense_id", transaction.expense_id);
-
-        if (error) throw error;
       } else if (transaction.type === "income" && transaction.income_id) {
-        const { error } = await supabase
+        await supabase
           .from("income")
           .delete()
           .eq("income_id", transaction.income_id);
-
-        if (error) throw error;
-      } else {
-        throw new Error("Missing transaction ID");
       }
 
       setTransactions((current) =>
@@ -135,7 +125,6 @@ export default function AllTransactionsScreen() {
 
       Alert.alert("Success", "Transaction deleted successfully");
     } catch (error) {
-      console.error("Error deleting transaction:", error);
       Alert.alert("Error", "Failed to delete transaction");
     } finally {
       setIsDeleting(false);
