@@ -68,7 +68,7 @@ export default function ScanScreen() {
       );
       const data = await response.json();
       if (data.error) throw data.error;
-      await sleep (10000)
+      await sleep (5000)
       setUploading(false)
       checkResult(data.token);
 
