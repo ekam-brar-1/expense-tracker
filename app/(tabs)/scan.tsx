@@ -85,6 +85,19 @@ export default function ScanScreen() {
             contentFit="contain"
             style={styles.previewImage}
           />
+          {scanResult && (
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultText}>
+              Total: ${scanResult.result.total?.toFixed(2)}
+            </Text>
+            <Text style={styles.resultText}>
+              Date: {new Date(scanResult.result.date).toLocaleDateString()}
+            </Text>
+            <Text style={styles.resultText}>
+              Merchant: {scanResult.result.establishment}
+            </Text>
+          </View>
+        )}
           {isProcessing && (
           <View style={styles.processingOverlay}>
             <ActivityIndicator size="large" color="white" />
@@ -110,19 +123,7 @@ export default function ScanScreen() {
           />
         </View>
 
-          {scanResult && (
-          <View style={styles.resultContainer}>
-            <Text style={styles.resultText}>
-              Total: ${scanResult.result.total?.toFixed(2)}
-            </Text>
-            <Text style={styles.resultText}>
-              Date: {new Date(scanResult.result.date).toLocaleDateString()}
-            </Text>
-            <Text style={styles.resultText}>
-              Merchant: {scanResult.result.establishment}
-            </Text>
-          </View>
-        )}
+          
       </View>
     );
   };
