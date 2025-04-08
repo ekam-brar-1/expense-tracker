@@ -68,6 +68,22 @@ export default function AppTabsLayout() {
           ),
         }}
       />
+       <Tabs.Screen
+        name="AskAI"
+        options={{
+          title: "Ask AI",
+          tabBarIcon: ({ focused, color }) => (
+            <Image
+              source={require("../../assets/aij.png")}
+              style={{
+                width: 24,
+                height: 24,
+                tintColor: focused ? "#333" : "#888",
+              }}
+            />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="profile"
         options={{

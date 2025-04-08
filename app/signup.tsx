@@ -22,41 +22,74 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const { signup } = useAuth();
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6; // basic rule: minimum 6 characters
+  };
+
   const handleSignup = async () => {
-    // Basic validation
     if (!firstname || !lastname || !email || !password) {
-      Alert.alert("Signup Error", "Please fill in all fields");
+      Alert.alert("Signup Error", "Please fill in all fields.");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      Alert.alert(
+        "Weak Password",
+        "Password should be at least 6 characters long."
+      );
       return;
     }
 
     try {
-      // Signup with authentication
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (authError) throw authError;
-
-      // If signup is successful and we have a user
-      if (data.user) {
-        // Insert additional user details into user_details table
-        const { error: insertError } = await supabase
-          .from("user_details")
-          .insert({
-            user_id: data.user.id,
-            first_name: firstname,
-            last_name: lastname,
-            email: email,
-          });
-
-        if (insertError) throw insertError;
-
-        // Navigate to the protected tabs layout after signup
-        router.replace("/(tabs)");
+      if (authError) {
+        console.error("Auth Error:", authError);
+        throw authError;
       }
+
+      if (!data?.user) {
+        throw new Error("Signup failed. Please try again.");
+      }
+
+      const { error: insertError } = await supabase
+        .from("user_details")
+        .insert({
+          user_id: data.user.id,
+          first_name: firstname,
+          last_name: lastname,
+          email: email,
+        });
+
+      if (insertError) {
+        console.error("Insert Error:", insertError);
+        throw insertError;
+      }
+
+      Alert.alert("Success", "Account created successfully!");
+      router.replace("/(tabs)");
     } catch (error: any) {
-      Alert.alert("Signup Error", error.message);
+      console.error("Signup Error:", error);
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert("Signup Error", errorMessage);
     }
   };
 
@@ -117,7 +150,6 @@ export default function SignupScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
