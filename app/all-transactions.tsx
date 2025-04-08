@@ -21,6 +21,7 @@ type Transaction = {
   name: string;
   amount: number;
   start_date: string;
+  end_date?: string;
   creation_date: string;
   type: "expense" | "income";
   repeat?: number;
@@ -55,7 +56,7 @@ export default function AllTransactionsScreen() {
       const { data: expenses, error: expensesError } = await supabase
         .from("expenses")
         .select(
-          "expense_id, user_id, name, amount, start_date, creation_date, repeat"
+          "expense_id, user_id, name, amount, start_date, end_date, creation_date, repeat"
         )
         .eq("user_id", user.id)
         .order("creation_date", { ascending: false });
@@ -65,7 +66,7 @@ export default function AllTransactionsScreen() {
       const { data: income, error: incomeError } = await supabase
         .from("income")
         .select(
-          "income_id, user_id, name, amount, start_date, creation_date, repeat"
+          "income_id, user_id, name, amount, start_date, end_date, creation_date, repeat"
         )
         .eq("user_id", user.id)
         .order("creation_date", { ascending: false });
@@ -203,6 +204,11 @@ export default function AllTransactionsScreen() {
             {transaction.amount.toFixed(2)}
           </Text>
           <Text style={styles.transactionDate}>{transaction.start_date}</Text>
+          {transaction.end_date && (
+            <Text style={styles.transactionDate}>
+              to {transaction.end_date}
+            </Text>
+          )}
 
           <TouchableOpacity
             style={styles.deleteButton}
