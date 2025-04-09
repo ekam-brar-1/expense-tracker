@@ -12,23 +12,23 @@ function RootContent() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  // We assume that the initial supabase session check is handled within our AuthProvider.
+
   useEffect(() => {
     setLoading(false);
   }, []);
 
-  // Define public routes (e.g., login & signup)
+  
   const publicRoutes = ["/login", "/signup"];
 
-  // If user is not authenticated and is not on a public route, redirect to login.
+ 
   useEffect(() => {
     if (!loading) {
       if (!user && !publicRoutes.includes(pathname)) {
         router.replace("/login");
       }
-      // Optionally, redirect an authenticated user away from public routes.
+     
       else if (user && publicRoutes.includes(pathname)) {
-        router.replace("/(tabs)"); // assuming your tabs layout is inside the (tabs) folder
+        router.replace("/(tabs)"); 
       }
     }
   }, [loading, user, pathname, router]);

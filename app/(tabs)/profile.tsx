@@ -107,7 +107,7 @@ const handleDeleteAccount = () => {
             <View style={styles.profileHeader}>
                 <Image 
                     style={styles.profileImage}
-                    source={require("../../assets/account-icon.png")}
+                    source={require("../../assets/profile.png")}
                 />
                 <View style={styles.userInfo}>
                     <Text style={styles.userName}>{firstName|| "Placeholder"}</Text>
@@ -119,7 +119,7 @@ const handleDeleteAccount = () => {
                 </View>
             </View>
 
-            {/* Settings Section  */}
+          
             <View style={styles.section}>
                 
                 <View style={styles.sectionHeading}>
@@ -140,7 +140,7 @@ const handleDeleteAccount = () => {
                 </View>
             </View>
 
-            {/* Account Section  */}
+         
             <View style={styles.section}>
                   <View style={styles.sectionHeading}>
                       <Image style={styles.iconImage} source={require("../../assets/account-icon.png")}/>
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     profileImage: {
       width: 80,
       height: 80,
-      borderRadius: 30,
+      borderRadius: 50,
       marginRight: 12,
     },
     iconImage: {

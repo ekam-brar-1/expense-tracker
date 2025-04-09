@@ -1,4 +1,4 @@
-// app/ask-ai.tsx
+
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, Button } from 'react-native';
 import axios from 'axios';
@@ -79,7 +79,7 @@ export default function AskAI() {
       const incomesList = buildTransactionsList(incomes, 'income');
  console.log('Expenses:', expensesList);
         console.log('Incomes:', incomesList);
-      // Construct a detailed prompt with the transaction data
+     
       const promptText = `You are a personal expense assistant. Below is the user's transaction data from the past month:
 
 Income Transactions:

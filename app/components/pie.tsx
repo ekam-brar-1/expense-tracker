@@ -14,7 +14,7 @@ const NetPieChart: React.FC<NetPieChartProps> = ({
   const sum = totalExpenses + totalIncome;
   const netValue = totalIncome - totalExpenses;
 
-  // If the sum is zero, render a fallback view.
+
   if (sum === 0) {
     return (
       <View style={styles.chartWrapper}>
@@ -23,13 +23,11 @@ const NetPieChart: React.FC<NetPieChartProps> = ({
     );
   }
 
-  // Prepare series data for the pie chart
   const series = [
     { value: totalExpenses, color: "#FF6B6B" },
     { value: totalIncome, color: "#2ecc71" },
   ];
 
-  // Set the overall dimensions for the chart
   const widthAndHeight = 200;
 
   return (
@@ -37,10 +35,10 @@ const NetPieChart: React.FC<NetPieChartProps> = ({
       <PieChart
         widthAndHeight={widthAndHeight}
         series={series}
-        cover={0.6} // cover value creates a donut chart effect
+        cover={0.6} 
       />
       <View style={styles.centerLabel}>
-        <Text style={styles.netText}>Net: ${netValue.toFixed(2)}</Text>
+        <Text style={styles.netText}>Net:</Text><Text style={styles.netText}> ${netValue.toFixed(2)}</Text>
       </View>
     </View>
   );
