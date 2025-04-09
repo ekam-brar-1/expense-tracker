@@ -1,4 +1,4 @@
-// app/_layout.tsx
+
 "use client";
 
 import { Slot, useRouter, usePathname } from "expo-router";

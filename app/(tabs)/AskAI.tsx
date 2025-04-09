@@ -132,7 +132,7 @@ please provide advice in plain text on how the user can improve their expense ma
         multiline
       />
       <Button
-        title={loading ? 'Thinking...' : 'Ask Gemini'}
+        title={loading ? 'Thinking...' : 'Ask AI'}
         onPress={askGemini}
         disabled={loading}
       />
